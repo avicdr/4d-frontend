@@ -3,6 +3,7 @@ import axios from "axios";
 import { errorPopup, successPopup, infoPopup } from "./popupMessages";
 // axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded';
 // axios.defaults.headers.get['Content-Type'] ='application/x-www-form-urlencoded';
+<<<<<<< HEAD
 // export const base = `http://localhost:4000`;
 export const base = `https://stagingapi.inventurs.in`;
 
@@ -14,6 +15,10 @@ const axiosInstance = axios.create({
 });
 
 export default axiosInstance;
+=======
+//export const base = `http://localhost:4000`;
+export const base = `https://stagingapi.inventurs.in`;
+>>>>>>> 92a70109a18343433215b5319893242c2a362874
 
 export async function authenticateUser(email: string, password: string) {
   try {
