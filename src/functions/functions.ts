@@ -3,12 +3,21 @@ import axios from "axios";
 import { errorPopup, successPopup, infoPopup } from "./popupMessages";
 // axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded';
 // axios.defaults.headers.get['Content-Type'] ='application/x-www-form-urlencoded';
-export const base = `http://localhost:4000`;
-// export const base = `https://stagingapi.inventurs.in`;
+// export const base = `http://localhost:4000`;
+export const base = `https://stagingapi.inventurs.in`;
+
+const axiosInstance = axios.create({
+  baseURL: base,
+  headers: {
+    'Access-Control-Allow-Origin': 'http://localhost:3000',
+  },
+});
+
+export default axiosInstance;
 
 export async function authenticateUser(email: string, password: string) {
   try {
-    const response = await axios.post(`${base}/api/auth/login`, {
+    const response = await axiosInstance.post(`/api/auth/login`, {
       email,
       password,
     });
@@ -16,16 +25,16 @@ export async function authenticateUser(email: string, password: string) {
       localStorage.setItem("isAuthenticated", "true");
       window.location.reload();
     }
-  } catch (error) {}
+  } catch (error) { }
 }
 export async function fetchCategories(
   setCategories: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    const response = await axios.post(`${base}/api/category/list`);
+    const response = await axiosInstance.post(`/api/category/list`);
     // console.log(response.data.category)
     setCategories(response.data.category);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function handleCategoryDelete(
@@ -33,7 +42,7 @@ export async function handleCategoryDelete(
   setCategories: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    await axios.delete(`${base}/api/category/delete/${id}`);
+    await axiosInstance.delete(`/api/category/delete/${id}`);
     fetchCategories(setCategories);
     successPopup(`Category deleted successfully`);
   } catch (error) {
@@ -48,7 +57,7 @@ export async function createCategory(
 ): Promise<any> {
   try {
     // Check if name already exists
-    const response = await axios.post(`${base}/api/category/list`);
+    const response = await axiosInstance.post(`/api/category/list`);
     const existingCategory = response.data.category.find(
       (category: any) => category.cat_name === name
     );
@@ -62,7 +71,7 @@ export async function createCategory(
     try {
       await axios({
         method: "post",
-        url: `${base}/api/category/create`,
+        url: `/api/category/create`,
         data: formData,
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -85,21 +94,21 @@ export async function fetchWallpapers(
 ) {
   try {
     // Check if name already exists
-    const response = await axios.post(`${base}/api/wallpaper/list`, {
+    const response = await axiosInstance.post(`/api/wallpaper/list`, {
       page,
       limit,
     });
     setData(response.data.wallpaper);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function fetchTags(
   setTags: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    const response = await axios.post(`${base}/api/tag/list`);
+    const response = await axiosInstance.post(`/api/tag/list`);
     setTags(response.data.tag);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function createTag(
@@ -107,7 +116,7 @@ export async function createTag(
   setTags: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   // Check if name already exists
-  const response = await axios.post(`${base}/api/tag/list`);
+  const response = await axiosInstance.post(`/api/tag/list`);
   const existingTag = response.data.tag.find(
     (category: any) => category.tag === tag
   );
@@ -121,7 +130,7 @@ export async function createTag(
   try {
     const reponse = await axios({
       method: "POST",
-      url: `${base}/api/tag/create`,
+      url: `/api/tag/create`,
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
     });
@@ -143,7 +152,7 @@ export async function editTag(
 
   await axios({
     method: "post",
-    url: `${base}/api/tag/update/${id}`,
+    url: `/api/tag/update/${id}`,
     data: formData,
     headers: { "Content-Type": "multipart/form-data" },
   });
@@ -156,14 +165,13 @@ export async function deleteTag(
   setTags: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   // console.log(newName, `      `, id)
-  await axios.delete(`${base}/api/tag/delete/${id}`);
+  await axiosInstance.delete(`/api/tag/delete/${id}`);
   fetchTags(setTags);
   successPopup("Tag Deleted Successfully");
 }
 
 export async function createWallpaper({
   category,
-  metaTitle,
   tag,
   file,
   thumbnail,
@@ -192,7 +200,7 @@ export async function createWallpaper({
   );
 
   try {
-    await axios.post(`${base}/api/wallpaper/create`, formData, {
+    await axiosInstance.post(`/api/wallpaper/create`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -215,9 +223,9 @@ export async function getUserData(
   setUsers: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    const response = await axios.post(`${base}/api/admin/users/list`);
+    const response = await axiosInstance.post(`/api/admin/users/list`);
     setUsers(response.data.users);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function fetchWallpaperByModel(
@@ -228,26 +236,24 @@ export async function fetchWallpaperByModel(
 ) {
   try {
     // Check if name already exists
-    const response = await axios.post(
-      `${base}/api/search/modelSearch/${model}`,
+    const response = await axiosInstance.post(
+      `/api/search/modelSearch/${model}`,
       { page, limit }
     );
     setData(response.data.Wallpaper);
     // console.log(response.data.Wallpaper)
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function getTotalWallpapers(
   setData: React.Dispatch<React.SetStateAction<any[]>>,
-  page: string,
-  limit: string
 ) {
   try {
     // Check if name already exists
-    const response = await axios.post(`${base}/api/admin/wallpaper/total`);
+    const response = await axiosInstance.post(`/api/admin/wallpaper/total`);
     setData(response.data.wallpaper_total);
     // console.log(response.data.Wallpaper)
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function fetchColors(
@@ -255,9 +261,9 @@ export async function fetchColors(
   limit: number
 ) {
   try {
-    const response = await axios.post(`${base}/api/color/list`, { limit });
+    const response = await axiosInstance.post(`/api/color/list`, { limit });
     setColors(response.data.color);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function AddColor(
@@ -265,16 +271,16 @@ export async function AddColor(
   setColors: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    await axios.post(`${base}/api/color/create`, { color_code });
+    await axiosInstance.post(`/api/color/create`, { color_code });
     successPopup("Color created successfully");
-    const response = await axios.post(`${base}/api/color/list`);
+    const response = await axiosInstance.post(`/api/color/list`);
     setColors(response.data.color);
   } catch (error: any) {
-      if (error.response && error.response.status === 404) {
-        infoPopup("Color already exists");
-      } else {
-        errorPopup("Failed to create color");
-      }
+    if (error.response && error.response.status === 404) {
+      infoPopup("Color already exists");
+    } else {
+      errorPopup("Failed to create color");
+    }
   }
 }
 
@@ -283,8 +289,8 @@ export async function deleteColor(
   setColors: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   // console.log(newName, `      `, id)
-  await axios.delete(`${base}/api/color/delete/${id}`);
-  const response = await axios.post(`${base}/api/color/list`);
+  await axiosInstance.delete(`/api/color/delete/${id}`);
+  const response = await axiosInstance.post(`/api/color/list`);
   successPopup("Color Deleted Successfully");
   setColors(response.data.color);
 }
@@ -293,9 +299,9 @@ export async function fetchBanners(
   setBanners: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    const response = await axios.get(`${base}/api/banner/list`);
+    const response = await axiosInstance.get(`/api/banner/list`);
     setBanners(response.data.banner);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function createBanner(
@@ -312,9 +318,10 @@ export async function createBanner(
     formData.append("visibility", visibility);
     formData.append("clicks", "0");
     formData.append("home_page_visibility", home_page_visibility);
-    try {await axios({
+    try {
+      await axios({
         method: "post",
-        url: `${base}/api/banner/create`,
+        url: `/api/banner/create`,
         data: formData,
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -322,9 +329,9 @@ export async function createBanner(
     } catch (error) {
       // console.log(error);
     }
-    const response = await axios.get(`${base}/api/banner/list`);
+    const response = await axiosInstance.get(`/api/banner/list`);
     setBanners(response.data.banner);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function fetchWallpapersWithFilter(
@@ -336,8 +343,8 @@ export async function fetchWallpapersWithFilter(
 ) {
   try {
     // Check if name already exists
-    const response = await axios.post(
-      `${base}/api/wallpaper/filter-wallpapers`,
+    const response = await axiosInstance.post(
+      `/api/wallpaper/filter-wallpapers`,
       {
         sortBy: filter,
         pageNumber,
@@ -363,39 +370,46 @@ export async function createCustomCategory(
   setData: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    await axios.post(`${base}/api/home/create_custom?`, {
+    await axiosInstance.post(`/api/home/create_custom`, {
       name: categoryName,
       wallpaper_ids: wallpaperArray,
+      visibility: true
     });
     successPopup("Custom Category Created Successfully");
     fetchCustomCategories(setData);
-  } catch (error) {}
+  } catch (error) {
+      console.log("true")
+      errorPopup(error)
+      console.log(error)
+  }
 }
 
 export async function fetchCustomCategories(
   setData: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    const response = await axios.post(`${base}/api/home/`);
+    const response = await axiosInstance.post(`/api/home/`);
     const customCatIndex = response.data.wallpaper.findIndex(
       (item: any) =>
         item.hasOwnProperty("customCategory") && item.customCategory.length > 0
     );
     setData(response.data.wallpaper[customCatIndex].customCategory);
     // console.log(response.data.wallpaper[customCatIndex].customCategory)
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function updateCustomCategory(
   categoryId: string,
-  wallpaperArray: Array<object>
+  wallpaperArray: Array<object>,
+  visibility: boolean,
 ) {
   try {
-    await axios.post(`${base}/api/home/update_custom?id=${categoryId}`, {
+    await axiosInstance.post(`/api/home/update_custom?id=${categoryId}`, {
       wallpaper_ids: wallpaperArray,
+      visibility: visibility,
     });
     successPopup("Custom category updated Successfully");
-  } catch (error) {}
+  } catch (error) { }
 }
 export async function editCategory(
   categoryId: string,
@@ -411,13 +425,13 @@ export async function editCategory(
     }
     await axios({
       method: "post",
-      url: `${base}/api/category/update/${categoryId}`,
+      url: `/api/category/update/${categoryId}`,
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
     });
     successPopup("Category Edited Successfully");
     fetchCategories(setData);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function fetchHexColors(
@@ -425,9 +439,9 @@ export async function fetchHexColors(
   limit: number
 ) {
   try {
-    const response = await axios.post(`${base}/api/hex-color/list`, { limit });
+    const response = await axiosInstance.post(`/api/hex-color/list`, { limit });
     setColors(response.data.color);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function AddHexColor(
@@ -435,10 +449,10 @@ export async function AddHexColor(
   setHexColors: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   try {
-    await axios.post(`${base}/api/hex-color/create`, { color_hex: color_code });
+    await axiosInstance.post(`/api/hex-color/create`, { color_hex: color_code });
     successPopup("Color created successfully");
     fetchHexColors(setHexColors, 100);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function deleteHexColor(
@@ -446,8 +460,8 @@ export async function deleteHexColor(
   setColors: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   // console.log(newName, `      `, id)
-  await axios.delete(`${base}/api/hex-color/delete/${id}`);
-  const response = await axios.post(`${base}/api/hex-color/list`);
+  await axiosInstance.delete(`/api/hex-color/delete/${id}`);
+  const response = await axiosInstance.post(`/api/hex-color/list`);
   successPopup("Color Deleted Successfully");
   setColors(response.data.color);
 }
@@ -456,23 +470,23 @@ export async function fetchAds(
   setData: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   // console.log(newName, `      `, id)
-  const response = await axios.post(`${base}/api/add/list`);
+  const response = await axiosInstance.post(`/api/add/list`);
   setData(response.data.adds);
 }
 export async function fetchBaseUrl(
   setData: React.Dispatch<React.SetStateAction<any[]>>
 ) {
   // console.log(newName, `      `, id)
-  const response = await axios.post(`${base}/api/baseurl/list`);
+  const response = await axiosInstance.post(`/api/baseurl/list`);
   setData(response.data.base_url);
 }
 
 export async function getSorting(
 ) {
   // console.log(newName, `      `, id)
-  const response = await axios.post(`${base}/api/sorting/list`);
+  const response = await axiosInstance.post(`/api/sorting/list`);
   return response.data.data
 }
 export async function setSorting(_4d: string, _4k: string, _live: string) {
-  await axios.post(`${base}/api/sorting/`, { _4k, _4d, _live });
+  await axiosInstance.post(`/api/sorting/`, { _4k, _4d, _live });
 }

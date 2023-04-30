@@ -86,7 +86,7 @@ const ColorList = ({colors, setColors}) => {
     },
     {
       name: "Hits",
-      selector: (row) => row.hit || 0,
+      selector: (row) => row.hits || 0,
     },
     {
       name: "Action",

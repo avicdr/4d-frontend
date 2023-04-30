@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  base,
-  fetchCustomCategories,
+import axiosInstance, {
   updateCustomCategory,
   fetchWallpapersWithFilter,
   fetchWallpaperByModel,
 } from "../../../../functions/functions.ts";
-import axios from "axios";
 import { Card } from "react-bootstrap";
 
 function CustomCategoryUpdate({ data }) {
-
   const [wallpaperIds, setWallpaperIds] = useState([]);
   const [totalWallpapers, setTotalWallpapers] = useState([]);
   const [categoryID, setCategoryID] = useState("");
@@ -19,22 +15,22 @@ function CustomCategoryUpdate({ data }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [model, setModel] = useState("4D");
-
+  const [visibility, setVisibility] = useState(false)
   const getWallpaperIDs = async () => {
-    const response = await axios.post(
-      `${base}/api/home/custom_category/${categoryID}`
+    const response = await axiosInstance.post(
+      `/api/home/custom_category/${categoryID}`
     );
     setWallpaperIds(response.data.data.wallpaper_id);
+    setVisibility(response.data.data.visibility)
   };
 
   useEffect(() => {
     if (categoryID.length > 0) {
       getWallpaperIDs();
+    } else {
+      setWallpaperIds([]);
     }
-    else {
-      setWallpaperIds([])
-    }
-  }, [categoryID]);
+  }, []);
 
   useEffect(() => {
     fetchWallpapersWithFilter(
@@ -68,7 +64,9 @@ function CustomCategoryUpdate({ data }) {
   return (
     <>
       <div className="d-flex flex-column align-items-center">
-        <label className="mt-3 mb-3" style={{ alignSelf: "flex-start" }}>Category</label>
+        <label className="mt-3 mb-3" style={{ alignSelf: "flex-start" }}>
+          Category
+        </label>
         <select
           className="form-select"
           onChange={(e) => {
@@ -80,7 +78,8 @@ function CustomCategoryUpdate({ data }) {
             backgroundColor: "rgba(0, 0, 0, 0)",
             borderRadius: "4px",
             width: "100%",
-            color: "rgb(131,131,131)", outline: "none"
+            color: "rgb(131,131,131)",
+            outline: "none",
           }}
         >
           <option value="">Select Category</option>
@@ -90,7 +89,21 @@ function CustomCategoryUpdate({ data }) {
             </option>
           ))}
         </select>
-        <label className="mt-3 mb-3" style={{ alignSelf: "flex-start" }}>Wallpaper Ids</label>
+        <div class="form-check m-2" style={{alignSelf: "flex-start"}}>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            checked={visibility}
+            onChange={(e)=>{setVisibility(e.target.checked);console.log(e.target.checked)}}
+            id="flexCheckDefault"
+          />
+          <label class="form-check-label" for="flexCheckDefault">
+            Visibility
+          </label>
+        </div>
+        <label className="mt-3 mb-3" style={{ alignSelf: "flex-start" }}>
+          Wallpaper Ids
+        </label>
         <div>
           {wallpaperIds.map((id) => (
             <span key={id}>{id}, </span>
@@ -152,8 +165,9 @@ function CustomCategoryUpdate({ data }) {
 
               return (
                 <button
-                  className={`pagination-btn${currentPage === page ? " active" : ""
-                    }`}
+                  className={`pagination-btn${
+                    currentPage === page ? " active" : ""
+                  }`}
                   key={i}
                   onClick={() => setCurrentPage(page)}
                   disabled={currentPage === page}
@@ -176,10 +190,10 @@ function CustomCategoryUpdate({ data }) {
                 right: "1rem",
                 outline: "none",
                 padding: "0.4rem 0.3rem",
-              border: "1px solid rgba(0, 0, 0, 0.2)",
-              backgroundColor: "rgba(0, 0, 0, 0)",
-              borderRadius: "4px",
-              color: "rgb(131,131,131)", outline: "none"
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                backgroundColor: "rgba(0, 0, 0, 0)",
+                borderRadius: "4px",
+                color: "rgb(131,131,131)",
               }}
               onChange={(e) => {
                 setModel(e.target.value);
@@ -196,10 +210,10 @@ function CustomCategoryUpdate({ data }) {
                 right: "8rem",
                 outline: "none",
                 padding: "0.4rem 0.3rem",
-              border: "1px solid rgba(0, 0, 0, 0.2)",
-              backgroundColor: "rgba(0, 0, 0, 0)",
-              borderRadius: "4px",
-              color: "rgb(131,131,131)", outline: "none"
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                backgroundColor: "rgba(0, 0, 0, 0)",
+                borderRadius: "4px",
+                color: "rgb(131,131,131)",
               }}
               onChange={(e) => {
                 setFilter(e.target.value);
@@ -227,7 +241,7 @@ function CustomCategoryUpdate({ data }) {
         <button
           className="btn btn-primary m-4 w-100"
           onClick={() => {
-            updateCustomCategory(categoryID, wallpaperIds);
+            updateCustomCategory(categoryID, wallpaperIds, visibility);
           }}
         >
           Update

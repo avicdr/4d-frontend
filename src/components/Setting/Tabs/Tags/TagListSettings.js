@@ -75,6 +75,10 @@ function TagListSettings({ data, setData }) {
       },
     },
     {
+      name: "Hits",
+      selector: (row) => row.hits || 0,
+    },
+    {
       name: "Action",
       selector: (row, index) => {
         return (

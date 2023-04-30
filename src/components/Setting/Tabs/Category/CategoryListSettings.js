@@ -4,7 +4,7 @@ import Dropzone, { useDropzone } from "react-dropzone";
 import {
   handleCategoryDelete,
   base,
-  editCategory
+  editCategory,
 } from "../../../../functions/functions.ts";
 import { TailSpin } from "react-loader-spinner";
 
@@ -81,6 +81,10 @@ function CategoryList({ data, setData }) {
         var today = new Date(row.createdAt).toLocaleDateString();
         return today;
       },
+    },
+    {
+      name: "Hits",
+      selector: (row) => row.hits || 0,
     },
     {
       name: "Image",

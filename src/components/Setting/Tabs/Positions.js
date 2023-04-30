@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base } from "../../../functions/functions.ts";
+import axiosInstance, { base } from "../../../functions/functions.ts";
 import axios from "axios";
 
 function Positions() {
@@ -12,7 +12,7 @@ function Positions() {
   const [customPosition, setCustomPosition] = useState("0");
   const [customVisibility, setCustomVisibility] = useState("0");
   const fetchData = async () => {
-    const response = await axios.post(`${base}/api/home/status`);
+    const response = await axiosInstance.post(`/api/home/status`);
     const data = response.data.status;
     // setTagPosition(Number(data.tag));
     // setColorPosition(Number(data.color));
@@ -24,7 +24,7 @@ function Positions() {
     setCustomVisibility(Number(data.customVisibility));
   };
   const handlePositionChange = async () => {
-    await axios.post(`${base}/api/home/sort`, {
+    await axiosInstance.post(`/api/home/sort`, {
       // color: colorPosition,
       // tags: tagPosition,
       trending: trendingPosition,
@@ -33,7 +33,6 @@ function Positions() {
       trendingVisibility: trendingVisibility,
       newlyAddedVisibility: newAddedVisibility,
       customVisibility: customVisibility,
-
     });
   };
   useEffect(() => {
@@ -46,7 +45,7 @@ function Positions() {
     border: "1px solid rgba(0, 0, 0, 0.2)",
     backgroundColor: "rgba(0, 0, 0, 0)",
     width: "100%",
-    color: "rgb(131,131,131)"
+    color: "rgb(131,131,131)",
   };
   return (
     <>
@@ -54,7 +53,15 @@ function Positions() {
         <h3>Change Positions</h3>
         <div className="d-flex flex-column m-2">
           <label style={{ "font-size": "22px" }}>Trending</label>
-          <span>Visibility: <input type="checkbox" id="mycheck" checked={trendingVisibility} onChange={(event) => setTrendingVisibility(event.target.checked)}></input></span>
+          <span>
+            Visibility:{" "}
+            <input
+              type="checkbox"
+              id="mycheck"
+              checked={trendingVisibility}
+              onChange={(event) => setTrendingVisibility(event.target.checked)}
+            ></input>
+          </span>
           <select
             style={styles}
             value={trendingPosition}
@@ -75,7 +82,15 @@ function Positions() {
         </div>
         <div className="d-flex flex-column m-2">
           <label style={{ "font-size": "22px" }}>New Added </label>
-          <span>Visibility: <input type="checkbox" id="mycheck" value={newAddedVisibility} onChange={(event) => setNewAddedVisibility(event.target.checked)}></input></span>
+          <span>
+            Visibility:{" "}
+            <input
+              type="checkbox"
+              id="mycheck"
+              value={newAddedVisibility}
+              onChange={(event) => setNewAddedVisibility(event.target.checked)}
+            ></input>
+          </span>
           <select
             style={styles}
             value={newAddedPosition}
@@ -96,7 +111,15 @@ function Positions() {
         </div>
         <div className="d-flex flex-column m-2">
           <label style={{ "font-size": "22px" }}>Custom Category</label>
-          <span>Visibility: <input type="checkbox" id="mycheck" value={customVisibility} onChange={(event) => setCustomVisibility(event.target.checked)}></input></span>
+          <span>
+            Visibility:{" "}
+            <input
+              type="checkbox"
+              id="mycheck"
+              value={customVisibility}
+              onChange={(event) => setCustomVisibility(event.target.checked)}
+            ></input>
+          </span>
           <select
             style={styles}
             value={customPosition}

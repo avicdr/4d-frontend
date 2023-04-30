@@ -5,10 +5,10 @@ import ColorAdd from "./Color/ColorAdd";
 import { fetchColors } from "../../../functions/functions.ts";
 
 const Colour = () => {
-  const [colors, setColors] = useState([])
-  useEffect(()=>{
-    fetchColors(setColors)
-  }, [])
+  const [colors, setColors] = useState([]);
+  useEffect(() => {
+    fetchColors(setColors);
+  }, []);
   // const [hexColors, setHexColors] = useState([])
   // useEffect(()=>{
   //   fetchHexColors(setHexColors)
@@ -17,11 +17,11 @@ const Colour = () => {
   const Tabs = [
     {
       name: "Color Name",
-      comp: <ColorList colors={colors} setColors={setColors}/>,
+      comp: <ColorList colors={colors} setColors={setColors} />,
     },
     {
       name: "Add Color Name",
-      comp: <ColorAdd setColor={setColors}/>,
+      comp: <ColorAdd setColor={setColors} />,
     },
     // {
     //   name: "Color Hex",
@@ -32,7 +32,7 @@ const Colour = () => {
     //   comp: <ColorAddHex setHexColors={setHexColors}/>,
     // },
   ];
-  return (<TabsComp Tabs={Tabs} />);
+  return <TabsComp Tabs={Tabs} />;
 };
 
 export default Colour;

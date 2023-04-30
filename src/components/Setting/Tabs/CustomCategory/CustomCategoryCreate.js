@@ -52,6 +52,7 @@ function CustomCategoryCreate({ setCustomCategories }) {
           <input placeholder="Enter custom category name"
             className="p-2 rounded"
             type="text"
+            value={categoryName}
             onChange={(e) => {
               setCategoryName(e.target.value);
             }}
@@ -204,6 +205,8 @@ function CustomCategoryCreate({ setCustomCategories }) {
           className="btn btn-primary m-4 w-100"
           onClick={() => {
             createCustomCategory(categoryName, wallpaperIds, setCustomCategories);
+            setWallpaperIds([])
+            setCategoryName("")
           }}
           disabled={categoryName === ""}
         >

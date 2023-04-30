@@ -11,7 +11,7 @@ function BannerList({ data, setData }) {
       const form = new FormData();
       form.append(query, value);
       await axios({
-        method: "post",
+        method: "POST",
         url: `${base}/api/banner/update/${id}`,
         data: form,
         headers: {

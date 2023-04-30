@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Card } from "react-bootstrap";
 import Wheel from "@uiw/react-color-wheel";
-import {
+import axiosInstance, {
   fetchCategories,
   fetchTags,
   fetchWallpaperByModel,
@@ -9,7 +9,7 @@ import {
   fetchColors,
   fetchWallpapersWithFilter,
   fetchHexColors,
-  AddHexColor
+  AddHexColor,
 } from "../../../functions/functions.ts";
 import Select from "react-select";
 import axios from "axios";
@@ -51,12 +51,10 @@ const Grid = ({ Heading, model }) => {
     setWallpapers(
       data.sort((a, b) => {
         // Sort by number of non-empty fields
-        const aNonEmptyFields = Object.values(a).filter(
-          (field) => field !== ""
-        ).length;
-        const bNonEmptyFields = Object.values(b).filter(
-          (field) => field !== ""
-        ).length;
+        const aNonEmptyFields = Object.values(a).filter((field) => field !== "")
+          .length;
+        const bNonEmptyFields = Object.values(b).filter((field) => field !== "")
+          .length;
         if (aNonEmptyFields !== bNonEmptyFields) {
           return aNonEmptyFields - bNonEmptyFields;
         }
@@ -82,28 +80,27 @@ const Grid = ({ Heading, model }) => {
   return (
     <div className="d-flex flex-column align-items-center">
       <h4>Total wallpapers: {data.length}</h4>
-      <div style={{ display: "flex", "flex-wrap": "wrap", width: "92%" }}>
-        {/* Filter the wallpapers into two arrays */}
+      <div className=" justify-content-center m-auto" style={{ display: "flex", "flex-wrap": "wrap", width: "92%" }}>
         {wallpapers.slice(startIndex, endIndex).map((item, ind) => (
-          <div className="col-md-2" key={ind}>
-            <div className="col-md-2" key={ind}>
-              <Card style={{ width: "210px", margin: 5 }}>
+          <div className="mx-3 my-2" key={ind} style={{ maxWidth: "18%" }}>
+            <div className="col-md-4" key={ind}>
+              <Card style={{ width: "180px", margin: 5 }}>
                 <Card.Img
                   variant="top"
                   src={"https://stagingapi.inventurs.in/" + item?.thumbnail}
                   style={{ height: "250px" }}
                 />
-                <Card.Body style={{ padding: 0 }}>
-                  <SelectCategory categories={categories} id={item._id} />
-                  <MultiSelecti tags={tags} id={item._id} />
-                  <SelectColor colors={colors} id={item._id} />
-                  <SelectColorHex id={item._id} />
-                </Card.Body>
+
+                <SelectCategory categories={categories} item={item} />
+                <TagSelect tags={tags} item={item} />
+                <SelectColor colors={colors} item={item} />
+                <SelectColorHex item={item} />
               </Card>
             </div>
           </div>
         ))}
       </div>
+
       <div className="m-2" style={{ alignSelf: "flex-start" }}>
         <div className="">
           <button
@@ -126,8 +123,9 @@ const Grid = ({ Heading, model }) => {
 
             return (
               <button
-                className={`pagination-btn${currentPage === page ? " active" : ""
-                  }`}
+                className={`pagination-btn${
+                  currentPage === page ? " active" : ""
+                }`}
                 key={i}
                 onClick={() => setCurrentPage(page)}
                 disabled={currentPage === page}
@@ -153,7 +151,7 @@ const Grid = ({ Heading, model }) => {
               border: "1px solid rgba(0, 0, 0, 0.2)",
               backgroundColor: "rgba(0, 0, 0, 0)",
               borderRadius: "4px",
-              color: "rgb(131,131,131)"
+              color: "rgb(131,131,131)",
             }}
             onChange={(e) => {
               setFilter(e.target.value);
@@ -183,40 +181,32 @@ const Grid = ({ Heading, model }) => {
 
 export default Grid;
 
-const MultiSelecti = ({ tags, id }) => {
+const TagSelect = ({ tags, item }) => {
   const [prevTags, setPrevTags] = useState([]);
   const options = tags.map((item) => {
     return { label: item.tag, value: item._id };
   });
 
   useEffect(() => {
-    const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
-      const data = response.data.wallpaper;
-      setPrevTags(data.tag);
-    };
-    getData();
+    setPrevTags(item.tag);
   }, []);
   const [newTags, setNewTags] = useState([]);
-  const updateWallpaper = useCallback(
-    async (_tags) => {
-      try {
-        const form = new FormData();
-        form.append("tag", _tags);
-        await axios({
-          method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
-          data: form,
-          headers: {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        });
-      } catch (err) {
-        // console.log(err);
-      }
-    },
-    [newTags]
-  );
+  const updateWallpaper = useCallback(async (_tags) => {
+    try {
+      const form = new FormData();
+      form.append("tag", _tags);
+      await axiosInstance({
+        method: "post",
+        url: `${base}/api/wallpaper/update/${item._id}`,
+        data: form,
+        headers: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      });
+    } catch (err) {
+      // console.log(err);
+    }
+  }, []);
   const handleSelect = (selectedList) => {
     const newTags = selectedList.map((item) => item.value);
     setNewTags(newTags);
@@ -226,6 +216,7 @@ const MultiSelecti = ({ tags, id }) => {
   return (
     <div style={{ width: "100%", border: "none" }}>
       <Select
+        placeholder="Select Tags"
         defaultValue={prevTags}
         options={options}
         onChange={handleSelect}
@@ -234,8 +225,17 @@ const MultiSelecti = ({ tags, id }) => {
           control: (baseStyles, state) => ({
             ...baseStyles,
             backgroundColor: "rgb(0 0 0 / 0%)",
-            color: "hsl(0, 0%, 20%)",
-            border: "1px solid rgba(0, 0, 0, 0.2)"
+            color: "white",
+            border: "1px solid rgba(0, 0, 0, 0.2)",
+          }),
+          option: (provided, state) => ({
+            ...provided,
+            display: "flex",
+            alignItems: "center",
+            padding: "0.5rem 0.5rem",
+            position: "relative",
+            backgroundColor: "white",
+            color: "black",
           }),
         }}
       />
@@ -243,40 +243,32 @@ const MultiSelecti = ({ tags, id }) => {
   );
 };
 
-const SelectCategory = ({ categories, id }) => {
+const SelectCategory = ({ categories, item }) => {
   const [cat_name, setCatName] = useState(null);
-  const options = categories.map((item) => {
-    return { label: item.cat_name, value: item._id };
+  const options = categories.map((option) => {
+    return { label: option.cat_name, value: option._id };
   });
 
   useEffect(() => {
-    const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
-      const data = response.data.wallpaper;
-      setCatName(data.cat_name);
-    };
-    getData();
-  }, [id]);
+    setCatName(item.cat_name);
+  }, [item.cat_name]);
 
-  const updateWallpaper = useCallback(
-    async (_cat_name) => {
-      try {
-        const form = new FormData();
-        form.append("cat_name", _cat_name);
-        await axios({
-          method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
-          data: form,
-          headers: {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        });
-      } catch (err) {
-        // console.log(err);
-      }
-    },
-    [cat_name, id]
-  );
+  const updateWallpaper = useCallback(async (_cat_name) => {
+    try {
+      const form = new FormData();
+      form.append("cat_name", _cat_name);
+      await axiosInstance({
+        method: "post",
+        url: `${base}/api/wallpaper/update/${item._id}`,
+        data: form,
+        headers: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      });
+    } catch (err) {
+      // console.log(err);
+    }
+  }, []);
 
   const handleSelect = (selectedItem) => {
     setCatName(selectedItem);
@@ -284,7 +276,7 @@ const SelectCategory = ({ categories, id }) => {
   };
 
   return (
-    <div id={id} style={{ width: "100%", border: "none" }}>
+    <div id={item._id} style={{ width: "100%", border: "none" }}>
       {cat_name != null ? (
         <select
           value={cat_name}
@@ -295,7 +287,7 @@ const SelectCategory = ({ categories, id }) => {
             backgroundColor: "rgba(0, 0, 0, 0)",
             borderRadius: "4px",
             width: "100%",
-            color: "rgb(131,131,131)"
+            color: "rgb(131,131,131)",
           }}
         >
           {" "}
@@ -309,21 +301,24 @@ const SelectCategory = ({ categories, id }) => {
           ))}
         </select>
       ) : (
-        <select style={{
-          padding: "0.4rem 0.3rem",
-          border: "1px solid rgba(0, 0, 0, 0.2)",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          borderRadius: "4px",
-          width: "100%",
-          color: "rgb(131,131,131)"
-        }}><option key={""} value={"none"}>
+        <select
+          style={{
+            padding: "0.4rem 0.3rem",
+            border: "1px solid rgba(0, 0, 0, 0.2)",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            borderRadius: "4px",
+            width: "100%",
+            color: "rgb(131,131,131)",
+          }}
+        >
+          <option key={""} value={"none"}>
             Select Category
-          </option></select>
+          </option>
+        </select>
       )}
     </div>
   );
 };
-
 
 const customStyles = {
   control: (provided) => ({
@@ -343,53 +338,45 @@ const customStyles = {
     position: "relative",
     backgroundColor: "rgba(120, 120, 120, 0.68)",
     color: state.data.color,
-    fontWeight: "bold"
+    fontWeight: "bold",
   }),
   singleValue: (provided, state) => ({
     ...provided,
     color: state.data.color,
     fontWeight: "bold",
-    fontSize: "1rem"
-  })
+    fontSize: "1rem",
+  }),
 };
 
-const SelectColor = ({ colors, id }) => {
+const SelectColor = ({ colors, item }) => {
   const [color_code, setColorCode] = useState("");
   const options = [
     { label: "No Color", color: "#fff", value: "none" }, // default option
     ...colors.map((item) => {
       return { label: item.name, color: item.hash_code, value: item.name };
-    })
-  ];  
+    }),
+  ];
 
   useEffect(() => {
-    const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
-      const data = response.data.wallpaper;
-      setColorCode(data.color_code);
-    };
-    getData();
+    setColorCode(item.color_code);
   }, []);
 
-  const updateWallpaper = useCallback(
-    async (_color_code) => {
-      try {
-        const form = new FormData();
-        form.append("color_code", _color_code);
-        await axios({
-          method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
-          data: form,
-          headers: {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        });
-      } catch (err) {
-        // console.log(err);
-      }
-    },
-    [color_code]
-  );
+  const updateWallpaper = useCallback(async (_color_code) => {
+    try {
+      const form = new FormData();
+      form.append("color_code", _color_code);
+      await axiosInstance({
+        method: "post",
+        url: `${base}/api/wallpaper/update/${item._id}`,
+        data: form,
+        headers: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      });
+    } catch (err) {
+      // console.log(err);
+    }
+  }, []);
 
   const handleSelect = (selectedOption) => {
     setColorCode(selectedOption.value);
@@ -397,8 +384,9 @@ const SelectColor = ({ colors, id }) => {
   };
 
   return (
-    <div id={id} style={{ width: "100%", border: "none" }}>
+    <div id={item._id} style={{ width: "100%", border: "none" }}>
       <Select
+        placeholder="Select Color"
         options={options}
         defaultValue={options.find((option) => option.value === color_code)}
         styles={customStyles}
@@ -408,7 +396,7 @@ const SelectColor = ({ colors, id }) => {
   );
 };
 
-const SelectColorHex = ({ id }) => {
+const SelectColorHex = ({ item }) => {
   const [colorHex, setColorHex] = useState("#000000");
   const [displayMode, setDisplayMode] = useState("colorwheel");
   const [hsva, setHsva] = useState({ h: 0, s: 0, v: 68, a: 1 });
@@ -449,16 +437,11 @@ const SelectColorHex = ({ id }) => {
     return hsva;
   };
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
-      const data = response.data.wallpaper;
-      if (data.color_hex) {
-        const hsva = hexToHsva(data.color_hex);
-        setColorHex(data.color_hex);
-        setHsva(hsva);
-      }
-    };
-    fetchData();
+    if (item.color_hex) {
+      const hsva = hexToHsva(item.color_hex);
+      setColorHex(item.color_hex);
+      setHsva(hsva);
+    }
   }, []);
 
   const handleColorChange = (color) => {
@@ -470,37 +453,39 @@ const SelectColorHex = ({ id }) => {
   const handleOkClick = useCallback(() => {
     updateWallpaper(colorHex);
     setPickerVisible(false);
-  }, [colorHex]);
-  const [opened, setOpened] = useState(false)
-  const updateWallpaper = useCallback(
-    async (colorHex) => {
-      try {
-        const form = new FormData();
-        form.append("color_hex", colorHex);
-        await axios({
-          method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
-          data: form,
-          headers: {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        });
-        AddHexColor(colorHex);
-      } catch (err) {
-        // console.log(err);
-      }
-    },
-    [id]
-  );
+  }, []);
+  const [opened, setOpened] = useState(false);
+  const updateWallpaper = useCallback(async (colorHex) => {
+    try {
+      const form = new FormData();
+      form.append("color_hex", colorHex);
+      await axiosInstance({
+        method: "post",
+        url: `${base}/api/wallpaper/update/${item._id}`,
+        data: form,
+        headers: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      });
+      AddHexColor(colorHex);
+    } catch (err) {
+      // console.log(err);
+    }
+  }, []);
 
   const colorButton = (
-    <div className="d-flex" style={{
-      width: "100%",
-      "alignItems": "center",
-      "marginLeft": "0.5rem",
-      justifyContent: "space-between",
-      color: "rgb(131,131,131)"
-    }}>Hex Color: <div
+    <div
+      className="d-flex"
+      style={{
+        width: "100%",
+        alignItems: "center",
+        marginLeft: "0.5rem",
+        justifyContent: "space-between",
+        color: "rgb(131,131,131)",
+      }}
+    >
+      Hex Color:{" "}
+      <div
         style={{
           width: "40%",
           height: "27px",
@@ -512,7 +497,8 @@ const SelectColorHex = ({ id }) => {
         onMouseEnter={() => {
           setPickerVisible(pickerVisible ? false : true);
         }}
-      /></div>
+      />
+    </div>
   );
   const handleModeChange = (mode) => {
     setDisplayMode(mode);
@@ -521,12 +507,30 @@ const SelectColorHex = ({ id }) => {
 
   const pickerMenu = (
     <div className="d-flex">
-      <button className="btn btn-sm btn-primary m-2" onClick={() => handleModeChange("colorwheel")}>Color Wheel</button>
-      <button className="btn btn-sm btn-primary m-2" onClick={() => handleModeChange("eyedropper")}>Eyedropper</button>
+      <button
+        className="btn btn-sm btn-primary m-2"
+        onClick={() => handleModeChange("colorwheel")}
+      >
+        Color Wheel
+      </button>
+      <button
+        className="btn btn-sm btn-primary m-2"
+        onClick={() => handleModeChange("eyedropper")}
+      >
+        Eyedropper
+      </button>
     </div>
   );
   return (
-    <div id={id} style={{ display: "flex", alignItems: "center", border: "1px solid rgba(0, 0, 0, 0.2)", borderRadius: "4px" }}>
+    <div
+      id={item._id}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        border: "1px solid rgba(0, 0, 0, 0.2)",
+        borderRadius: "4px",
+      }}
+    >
       {colorButton}
       {pickerVisible && displayMode === "colorwheel" ? (
         <div
@@ -539,19 +543,26 @@ const SelectColorHex = ({ id }) => {
             zIndex: 30,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center"
+            justifyContent: "center",
           }}
-          onMouseLeave={() => { setPickerVisible(false); }}
+          onMouseLeave={() => {
+            setPickerVisible(false);
+          }}
         >
           {pickerMenu}
           <Wheel color={hsva} onChange={handleColorChange} />
-          <button className="btn btn-primary btn-sm m-3" onClick={handleOkClick}>
+          <button
+            className="btn btn-primary btn-sm m-3"
+            onClick={handleOkClick}
+          >
             OK
           </button>
         </div>
-      ) : ("")}
+      ) : (
+        ""
+      )}
       {pickerVisible && displayMode === "eyedropper" ? (
-        (<>
+        <>
           <div
             style={{
               position: "absolute",
@@ -562,7 +573,7 @@ const SelectColorHex = ({ id }) => {
               zIndex: 30,
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center"
+              justifyContent: "center",
             }}
             onMouseLeave={() => {
               if (!opened) {
@@ -581,14 +592,26 @@ const SelectColorHex = ({ id }) => {
                 setColorHex(hexColor);
                 setHsva(hsva);
               }}
-              onClick={() => { setOpened(opened ? false : true) }}
-              style={{ width: "80%", height: "2rem", margin: "1rem" }} />
-            <button className="btn btn-primary btn-sm m-3" onClick={() => { handleOkClick(); setPickerVisible(false); setOpened(false) }}>
+              onClick={() => {
+                setOpened(opened ? false : true);
+              }}
+              style={{ width: "80%", height: "2rem", margin: "1rem" }}
+            />
+            <button
+              className="btn btn-primary btn-sm m-3"
+              onClick={() => {
+                handleOkClick();
+                setPickerVisible(false);
+                setOpened(false);
+              }}
+            >
               OK
             </button>
           </div>
         </>
-        )) : ""}
+      ) : (
+        ""
+      )}
     </div>
   );
 };

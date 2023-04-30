@@ -4,7 +4,7 @@ import Button from "react-bootstrap/Button";
 // import { publicFetch } from "../util/fetcher.js";
 import Dropdown from "react-bootstrap/Dropdown";
 import { Link } from "react-router-dom";
-import { base } from "../../functions/functions.ts";
+import axiosInstance, { base } from "../../functions/functions.ts";
 import { TailSpin } from "react-loader-spinner";
 
 function Dashboard() {
@@ -28,22 +28,22 @@ function Dashboard() {
     }
   }, [_4k, _4d, live]);
   const getData = async () => {
-    const PaidUserResponse = await axios.post(`${base}/api/admin/users/paid`);
+    const PaidUserResponse = await axiosInstance.post(`/api/admin/users/paid`);
     setPaidUser(PaidUserResponse.data.paid_total);
-    const totalUserResponse = await axios.post(`${base}/api/admin/users/total`);
+    const totalUserResponse = await axiosInstance.post(`/api/admin/users/total`);
     setTotalUsers(totalUserResponse.data.total_user);
-    const FreeUserResponse = await axios.post(`${base}/api/admin/users/free`);
+    const FreeUserResponse = await axiosInstance.post(`/api/admin/users/free`);
     setFreeUser(FreeUserResponse.data.free_total);
-    const _4kWallpaperResponse = await axios.post(
-      `${base}/api/search/total/4K`
+    const _4kWallpaperResponse = await axiosInstance.post(
+      `/api/search/total/4K`
     );
     set_4k(_4kWallpaperResponse.data.Wallpaper.length);
-    const _4dWallpaperResponse = await axios.post(
-      `${base}/api/search/total/4D`
+    const _4dWallpaperResponse = await axiosInstance.post(
+      `/api/search/total/4D`
     );
     set4d(_4dWallpaperResponse.data.Wallpaper.length);
-    const liveWallpaperResponse = await axios.post(
-      `${base}/api/search/total/live`
+    const liveWallpaperResponse = await axiosInstance.post(
+      `/api/search/total/live`
     );
     setLive(liveWallpaperResponse.data.Wallpaper.length);
   };
