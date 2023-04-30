@@ -3,8 +3,8 @@ import axios from "axios";
 import { errorPopup, successPopup, infoPopup } from "./popupMessages";
 // axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded';
 // axios.defaults.headers.get['Content-Type'] ='application/x-www-form-urlencoded';
-export const base = `http://localhost:4000`;
-// export const base = `https://stagingapi.inventurs.in`;
+//export const base = `http://localhost:4000`;
+export const base = `https://stagingapi.inventurs.in`;
 
 export async function authenticateUser(email: string, password: string) {
   try {
