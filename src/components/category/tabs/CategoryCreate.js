@@ -1,8 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import Dropzone, { useDropzone } from "react-dropzone";
 import { createCategory } from "../../../functions/functions.ts";
 
@@ -23,7 +19,7 @@ function CategoryCreate({ setData }) {
     const accept = {
       "image/jpeg": [".jpeg"],
     };
-    return accept
+    return accept;
   }, []);
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: onDropMainFile,
@@ -44,6 +40,11 @@ function CategoryCreate({ setData }) {
               onChange={handleChange}
               className={`form-control ${invalidClass}`}
               placeholder="Enter Category Name"
+              style={{
+                background: "none",
+                border: "1px solid rgba(131, 131,131,0.2)",
+                color: "white"
+              }}
             />
           </div>
           <Dropzone>
@@ -51,7 +52,7 @@ function CategoryCreate({ setData }) {
               <div
                 {...getRootProps()}
                 style={{
-                  border: "1px solid #ccc",
+                  border: "1px solid rgba(131,131,131,0.2)",
                   borderRadius: "5px",
                   height: "100px",
                   cursor: "pointer",

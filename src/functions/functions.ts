@@ -1,24 +1,19 @@
 import React from "react";
 import axios from "axios";
 import { errorPopup, successPopup, infoPopup } from "./popupMessages";
-// axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded';
-// axios.defaults.headers.get['Content-Type'] ='application/x-www-form-urlencoded';
-<<<<<<< HEAD
-// export const base = `http://localhost:4000`;
-export const base = `https://stagingapi.inventurs.in`;
+
+export const base = `http://localhost:4000`;
+// export const base = `https://stagingapi.inventurs.in`;
 
 const axiosInstance = axios.create({
   baseURL: base,
   headers: {
-    'Access-Control-Allow-Origin': 'http://localhost:3000',
+    'Access-Control-Allow-Origin': 'https://admin.inventurs.in',
+    "Authorization": `Bearer debugflow@#$$`
   },
 });
 
 export default axiosInstance;
-=======
-//export const base = `http://localhost:4000`;
-export const base = `https://stagingapi.inventurs.in`;
->>>>>>> 92a70109a18343433215b5319893242c2a362874
 
 export async function authenticateUser(email: string, password: string) {
   try {
@@ -28,8 +23,36 @@ export async function authenticateUser(email: string, password: string) {
     });
     if (response.data.success) {
       localStorage.setItem("isAuthenticated", "true");
+      if (response.data.role.toLowerCase() !== "admin") {
+        localStorage.setItem("email", email)
+      }
+      localStorage.setItem("role", response.data.role.toLowerCase())
       window.location.reload();
     }
+  } catch (error) { }
+}
+export async function changePassword(old_password: string, password: string) {
+  try {
+    await axiosInstance.post(`/api/admin/change-password`, {
+      email: localStorage.getItem("email"),
+      old_password: old_password,
+      new_password: password,
+    });
+    successPopup("Password updated successfully")
+  } catch (error) {
+    errorPopup("Couldn't update password")
+  }
+}
+
+export async function createUser(name: string, email: string, password: string, role: string) {
+  try {
+    await axiosInstance.post(`/api/auth/register`, {
+      name,
+      email,
+      password,
+      role
+    });
+    successPopup("User created successfully")
   } catch (error) { }
 }
 export async function fetchCategories(
@@ -74,7 +97,7 @@ export async function createCategory(
     formData.append("cat_name", name);
     formData.append("thumbnail", file);
     try {
-      await axios({
+      await axiosInstance({
         method: "post",
         url: `/api/category/create`,
         data: formData,
@@ -133,7 +156,7 @@ export async function createTag(
   const formData = new FormData();
   formData.append(`tag`, tag);
   try {
-    const reponse = await axios({
+    const reponse = await axiosInstance({
       method: "POST",
       url: `/api/tag/create`,
       data: formData,
@@ -155,7 +178,7 @@ export async function editTag(
   const formData = new FormData();
   formData.append("tag", newName);
 
-  await axios({
+  await axiosInstance({
     method: "post",
     url: `/api/tag/update/${id}`,
     data: formData,
@@ -175,6 +198,10 @@ export async function deleteTag(
   successPopup("Tag Deleted Successfully");
 }
 
+export async function increaseCount(email: string | null, type: string) {
+  await axiosInstance.post("/api/designer/increaseCount", { email, type })
+}
+
 export async function createWallpaper({
   category,
   tag,
@@ -185,7 +212,6 @@ export async function createWallpaper({
   price,
   model,
 }: {
-  metaTitle: string;
   category: string;
   tag: Array<string>;
   file: File;
@@ -218,6 +244,11 @@ export async function createWallpaper({
         model,
       },
     });
+    if (localStorage.getItem("email") && localStorage.getItem("role") !== "admin") {
+      let email = localStorage.getItem("email");
+      increaseCount(email, model)
+    }
+
     successPopup(`Wallpaper created successfully`);
   } catch (error) {
     // console.log(error);
@@ -225,10 +256,11 @@ export async function createWallpaper({
 }
 
 export async function getUserData(
-  setUsers: React.Dispatch<React.SetStateAction<any[]>>
+  setUsers: React.Dispatch<React.SetStateAction<any[]>>,
+  filter: string
 ) {
   try {
-    const response = await axiosInstance.post(`/api/admin/users/list`);
+    const response = await axiosInstance.post(`/api/admin/users/list`, { filter });
     setUsers(response.data.users);
   } catch (error) { }
 }
@@ -324,7 +356,7 @@ export async function createBanner(
     formData.append("clicks", "0");
     formData.append("home_page_visibility", home_page_visibility);
     try {
-      await axios({
+      await axiosInstance({
         method: "post",
         url: `/api/banner/create`,
         data: formData,
@@ -365,7 +397,7 @@ export async function fetchWallpapersWithFilter(
     }
     // console.log(response.data.data);
   } catch (error) {
-    console.error(error);
+    // console.error(error);
   }
 }
 
@@ -383,9 +415,9 @@ export async function createCustomCategory(
     successPopup("Custom Category Created Successfully");
     fetchCustomCategories(setData);
   } catch (error) {
-      console.log("true")
-      errorPopup(error)
-      console.log(error)
+    // console.log("true")
+    errorPopup(error)
+    // console.log(error)
   }
 }
 
@@ -405,7 +437,7 @@ export async function fetchCustomCategories(
 
 export async function updateCustomCategory(
   categoryId: string,
-  wallpaperArray: Array<object>,
+  wallpaperArray: Array<string>,
   visibility: boolean,
 ) {
   try {
@@ -428,7 +460,7 @@ export async function editCategory(
     if (thumbnail !== null) {
       formData.append("thumbnail", thumbnail);
     }
-    await axios({
+    await axiosInstance({
       method: "post",
       url: `/api/category/update/${categoryId}`,
       data: formData,
@@ -492,6 +524,90 @@ export async function getSorting(
   const response = await axiosInstance.post(`/api/sorting/list`);
   return response.data.data
 }
+
 export async function setSorting(_4d: string, _4k: string, _live: string) {
   await axiosInstance.post(`/api/sorting/`, { _4k, _4d, _live });
+}
+
+export async function setDefaultCoins(
+  coins: Number
+) {
+  // console.log(newName, `      `, id)
+  try {
+    await axiosInstance.post(`/api/admin/default_coins`, { coins });
+    successPopup("Default Coins Successfully Updated")
+  }
+  catch (error) {
+    errorPopup("Error while updating default coins")
+  }
+
+}
+
+export async function getNotifications(
+  setData: React.Dispatch<React.SetStateAction<any[]>>
+) {
+  // console.log(newName, `      `, id)
+  const response = await axiosInstance.post(`/api/notify/list`);
+  setData(response.data.notifications);
+}
+
+export async function createNotification(
+  title: string,
+  topic: string,
+  description: string,
+  image: File,
+  imageSent: string,
+  onClick: string,
+  setData: React.Dispatch<React.SetStateAction<any[]>>
+) // send formdata and string data together
+{
+  const formData = new FormData();
+  formData.append("files", image);
+
+  try {
+    await axiosInstance.post(`/api/notify/create`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      params: {
+        title,
+        topic,
+        description,
+        imageSent,
+        onClick,
+      },
+    });
+    successPopup(`Notification sent successfully`);
+    getNotifications(setData)
+  } catch (error) {
+    // console.log(error);
+  }
+}
+
+export async function repeatNotifications(
+  id: string,
+) {
+  // console.log(newName, `      `, id)
+  await axiosInstance.post(`/api/notify/repeat/${id}`);
+  successPopup("Notification Sent Successfully")
+}
+
+export async function deleteNotifications(
+  id: string,
+  setData: React.Dispatch<React.SetStateAction<any[]>>
+) {
+  // console.log(newName, `      `, id)
+  await axiosInstance.post(`/api/notify/delete/${id}`);
+  getNotifications(setData)
+  successPopup("Notification Deleted Successfully")
+}
+
+export async function setMonthlyCount(
+  monthly_4d: string,
+  monthly_4k: string,
+  monthly_live: string
+) {
+  // console.log(newName, `      `, id)
+  await axiosInstance.post(`/api/designer/setMonthly`, { monthly_4d, monthly_4k, monthly_live });
+  successPopup("Monthly Count Set Successfully")
 }

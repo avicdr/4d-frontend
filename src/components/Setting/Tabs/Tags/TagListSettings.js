@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import { handleCategoryDelete, base, editTag, deleteTag } from "../../../../functions/functions.ts";
+import axiosInstance, { handleCategoryDelete, base, editTag, deleteTag } from "../../../../functions/functions.ts";
 import { ToastContainer } from "react-toastify";
 
 function TagListSettings({ data, setData }) {
@@ -8,17 +8,15 @@ function TagListSettings({ data, setData }) {
 
   const fetchWallpaperCount = async (tagId) => {
     try {
-      const response = await fetch(
-        `${base}/api/tag/wallpaper-count/${tagId}`,
+      const response = await axiosInstance.post(
+        `}/api/tag/wallpaper-count/${tagId}`,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-      const data = await response.json();
-      return data.wallpaper_count_tag;
+      return response.data.wallpaper_count_tag;
     } catch (error) {
       console.error(error);
     }

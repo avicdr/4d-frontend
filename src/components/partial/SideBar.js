@@ -1,6 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
+
 function SideBar() {
+  const role = localStorage.getItem("role");
+
   return (
     <>
       <aside className="main-sidebar sidebar-dark-primary elevation-4">
@@ -21,24 +24,28 @@ function SideBar() {
               role="menu"
               data-accordion="false"
             >
-              <li className="nav-item">
-                <Link to="/" className="nav-link">
-                  <i className="nav-icon fas fa-th"></i>
-                  <p>
-                    Dashboard
-                    <span className="right badge badge-danger">New</span>
-                  </p>
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/user-master" className="nav-link">
-                  <i className="nav-icon fas fa-th"></i>
-                  <p>
-                    User Master
-                    <span className="right badge badge-danger">New</span>
-                  </p>
-                </Link>
-              </li>
+              {role === "admin" && (
+                <>
+                  <li className="nav-item">
+                    <Link to="/" className="nav-link">
+                      <i className="nav-icon fas fa-th"></i>
+                      <p>
+                        Dashboard
+                        <span className="right badge badge-danger">New</span>
+                      </p>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/user-master" className="nav-link">
+                      <i className="nav-icon fas fa-th"></i>
+                      <p>
+                        User Master
+                        <span className="right badge badge-danger">New</span>
+                      </p>
+                    </Link>
+                  </li>
+                </>
+              )}
               {/* <li className="nav-item">
                 <Link to="/tag" className="nav-link">
                   <i className="nav-icon fas fa-tag"></i>
@@ -51,18 +58,37 @@ function SideBar() {
                   <p>Category</p>
                 </Link>
               </li> */}
-              <li className="nav-item">
+              {role === "admin" ? (<li className="nav-item">
                 <Link to="/wallpapers" className="nav-link">
                   <i className="nav-icon fas fa-tag"></i>
                   <p>Wallpaper</p>
                 </Link>
-              </li>{" "}
+              </li>):(<li className="nav-item">
+                <Link to="/" className="nav-link">
+                  <i className="nav-icon fas fa-tag"></i>
+                  <p>Wallpaper</p>
+                </Link>
+              </li>)}
               <li className="nav-item">
                 <Link to="/push-notification" className="nav-link">
                   <i className="nav-icon fas fa-tag"></i>
                   <p>Push Notification</p>
                 </Link>
               </li>
+              <li className="nav-item">
+                  <Link to="/target" className="nav-link">
+                    <i className="nav-icon fas fa-tag"></i>
+                    <p>Target</p>
+                  </Link>
+                </li>
+              {role === "admin" && (
+                <li className="nav-item">
+                  <Link to="/create-user" className="nav-link">
+                    <i className="nav-icon fas fa-tag"></i>
+                    <p>Add User</p>
+                  </Link>
+                </li>
+              )}
               <li className="nav-item">
                 <Link to="/settings" className="nav-link">
                   <i className="nav-icon fas fa-tag"></i>

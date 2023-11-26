@@ -1,6 +1,6 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { base, fetchAds } from "../../../functions/functions.ts";
+import axiosInstance, { base, fetchAds } from "../../../functions/functions.ts";
 const Ads = () => {
   const columns = [
     {
@@ -26,7 +26,7 @@ const Ads = () => {
   const addRow = () => {
     setRowCount(rowCount + 1);
   };
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault();
     const row = event.target.parentNode.parentNode;
     const inputs = row.querySelectorAll("input");
@@ -35,8 +35,7 @@ const Ads = () => {
     const ad_id = inputs[2].value;
     const data = { ad_note, app_id, ad_id };
 
-    fetch(`${base}/api/add/create`, {
-      method: "POST",
+    await axiosInstance.post(`/api/add/create`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -47,14 +46,13 @@ const Ads = () => {
       })
       .catch((error) => {});
   };
-  const handleEdit = (id, adNoteId, appId, adsId) => {
+  const handleEdit = async(id, adNoteId, appId, adsId) => {
     const ad_note = document.getElementById(adNoteId).value;
     const app_id = document.getElementById(appId).value;
     const ad_id = document.getElementById(adsId).value;
     const data = { ad_note, app_id, ad_id };
 
-    fetch(`${base}/api/add/edit/${id}`, {
-      method: "POST",
+    await axiosInstance.post(`/api/add/edit/${id}`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -66,8 +64,8 @@ const Ads = () => {
       .catch((error) => {});
   };
 
-  const handleDelete = (id)=>{
-    fetch(`${base}/api/add/delete/${id}`, {
+  const handleDelete = async(id)=>{
+    await axiosInstance(`${base}/api/add/delete/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

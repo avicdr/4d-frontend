@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Select from "react-select";
-import {
+import ntc from "ntcjs";
+import axiosInstance, {
   fetchTags,
   fetchWallpapers,
   fetchCategories,
@@ -9,36 +10,34 @@ import {
   fetchColors,
   fetchWallpapersWithFilter,
   fetchHexColors,
-  AddHexColor,
 } from "../../functions/functions.ts";
 import Wheel from "@uiw/react-color-wheel";
 import axios from "axios";
 import FormData from "form-data";
 import { TailSpin } from "react-loader-spinner";
+import {
+  successPopup,
+  infoPopup,
+  errorPopup,
+} from "../../functions/popupMessages.js";
 
 function WallpaperList() {
-  const [totalWallpapers, setTotalWallpapers] = useState(1);
-  useEffect(() => {
-    getTotalWallpapers(setTotalWallpapers);
-  }, []);
-
+  const [totalWallpapers, setTotalWallpapers] = useState([]);
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [colors, setColors] = useState([]);
-  const [hexColors, setHexColors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [model, setModel] = useState("all");
   useEffect(() => {
     fetchTags(setTags);
     fetchCategories(setCategories);
-    fetchColors(setColors);
-    fetchHexColors(setHexColors);
   }, []);
   useEffect(() => {
-    if (totalWallpapers === 1) {
+    if (totalWallpapers.length === 0 && data.length !== 0) {
       setLoading(true);
     } else {
       setLoading(false);
     }
+    // console.log(totalWallpapers);
   }, [totalWallpapers]);
 
   const columns = [
@@ -58,6 +57,9 @@ function WallpaperList() {
       name: "Color Hex",
     },
     {
+      name: "Model",
+    },
+    {
       name: "Thumbnail",
       selector: (row) => row.Thmbnl,
     },
@@ -66,16 +68,22 @@ function WallpaperList() {
       selector: (row) => row.file,
     },
     {
-      name: "Last Updated",
+      name: "Created At",
     },
     {
       name: "Status",
     },
     {
-      name: "Visible",
+      name: "Visibility",
     },
     {
-      name: "Total Downloads",
+      name: "Downloads",
+    },
+    {
+      name: "Main Size",
+    },
+    {
+      name: "Thumb Size",
     },
     {
       name: "Likes",
@@ -84,18 +92,24 @@ function WallpaperList() {
 
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filter, setFilter] = useState("");
+  const [newPageNumber, setNewPageNumber] = useState(1);
   const itemsPerPage = 50;
+  const [filter, setFilter] = useState(localStorage.getItem("filter") || "");
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = currentPage * itemsPerPage;
   useEffect(() => {
-    if (filter === "") {
-      fetchWallpapers(setData, currentPage, itemsPerPage);
-    } else {
-      fetchWallpapersWithFilter(setData, filter, currentPage, itemsPerPage);
-    }
+    localStorage.setItem("filter", filter);
+    fetchWallpapersWithFilter(
+      setTotalWallpapers,
+      filter,
+      1,
+      100000000000,
+      model
+    );
     window.scrollTo(0, 0);
-  }, [currentPage, filter]);
+  }, [currentPage, filter, model]);
 
-  const totalPages = Math.ceil(totalWallpapers / itemsPerPage);
+  const totalPages = Math.ceil(totalWallpapers.length / itemsPerPage);
   // const startIndex = (currentPage - 1) * itemsPerPage;
   // const endIndex = startIndex + itemsPerPage;
 
@@ -129,7 +143,67 @@ function WallpaperList() {
       )}
       {!loading ? (
         <>
-          <h4>Total wallpapers: {totalWallpapers}</h4>
+          <div className="d-flex justify-content-between">
+            <h4 className="w-50">Total wallpapers: {totalWallpapers.length}</h4>
+            <div
+              className="d-flex w-100 mt-2"
+              style={{ justifyContent: "flex-end" }}
+            >
+              <select
+                defaultValue={""}
+                style={{
+                  padding: "0.7rem 0.3rem",
+                  border: "1px solid rgba(0, 0, 0, 0.2)",
+                  backgroundColor: "rgba(0, 0, 0, 0)",
+                  color: "rgb(131,131,131)",
+                  borderRadius: "7px",
+                  outline: "none",
+                }}
+                onChange={(e) => {
+                  setModel(e.target.value);
+                }}
+                value={model}
+              >
+                <option value={"4D"}>4D</option>
+                <option value={"4K"}>4K</option>
+                <option value={"live"}>Live</option>
+                <option value={"all"}>All</option>
+              </select>
+              <select
+                defaultValue={"Date Latest"}
+                style={{
+                  // position: "absolute",
+                  marginLeft: "2rem",
+                  padding: "0.7rem 0.3rem",
+                  border: "1px solid rgba(0, 0, 0, 0.2)",
+                  backgroundColor: "rgba(0, 0, 0, 0)",
+                  color: "rgb(131,131,131)",
+                  borderRadius: "7px",
+                  outline: "none",
+                }}
+                value={filter}
+                onChange={(e) => {
+                  setFilter(e.target.value);
+                }}
+              >
+                <option value="">No Filters</option>
+                <option value={"With Primary"}>With Primary</option>
+                <option value={"No Primary"}>No Primary</option>
+                <option value={"No Category"}>No Category</option>
+                <option value={"No Colors"}>No Colors</option>
+                <option value={"No Tags"}>No Tag</option>
+                <option value={"Date Oldest"}>Date Oldest</option>
+                <option value={"Date Latest"}>Date Latest</option>
+                <option value={"Like Up"}>Like Up</option>
+                <option value={"Like Down"}>Like Down</option>
+                <option value={"Download Up"}>Download Up</option>
+                <option value={"Download Down"}>Download Down</option>
+                <option value={"Hide"}>Hidden</option>
+                <option value={"Size Up"}>Size Up</option>
+                <option value={"Size Down"}>Size Down</option>
+              </select>
+            </div>
+          </div>
           <div style={{ overflowX: "scroll" }} className="m-3">
             <table className="table">
               <thead className="table-dark">
@@ -137,134 +211,200 @@ function WallpaperList() {
                   {columns.map((item, ind) => {
                     return (
                       <th key={ind} scope="col">
-                        {item.name}
+                        <div
+                          style={{
+                            width: "max-content",
+                            textAlign: "center",
+                            margin: "auto",
+                          }}
+                        >
+                          {item.name}
+                        </div>
                       </th>
                     );
                   })}
                 </tr>
               </thead>
               <tbody>
-                {data.map((item, ind) => {
-                  return (
-                    <tr key={ind}>
-                      <td>
-                        <MultiSelecti tags={tags} id={item._id} />
-                      </td>
-
-                      <td>
-                        {" "}
-                        {/* <div className="table-input" key={ind}> */}
-                        <input
-                          placeholder={Number(item?.price)}
-                          id={item._id}
-                          disabled={item.paid !== "PAID" ? true : false}
-                          style={{
-                            width: "100px",
-                            margin: "0.2rem",
-                            padding: "0.3rem",
-                            borderRadius: "4px",
-                            outline: "none",
-                            background: "none"
-                          }}
-                          onChange={async (e) => {
-                            const form = new FormData();
-                            form.append("price", Number(e.target.value));
-                            await axios({
-                              method: "post",
-                              url: `${base}/api/wallpaper/update/${item._id}`,
-                              data: form,
-                              headers: {
-                                headers: {
-                                  "Content-Type": "multipart/form-data",
-                                },
-                              },
-                            });
-                          }}
-                        />
-                        {/* </div> */}
-                      </td>
-                      <td>
-                        <SelectCategory categories={categories} id={item._id} />
-                      </td>
-                      <td>
-                        <SelectColor colors={colors} id={item._id} />
-                      </td>
-                      <td>
-                        <SelectColorHex id={item._id} />
-                      </td>
-                      <td>
-                        <div className="d-flex " key={ind}>
-                          <a
-                            href={
-                              "https://stagingapi.inventurs.in/" +
-                              item?.thumbnail
-                            }
-                            download
-                            target="_blank"
-                          >
-                            <img
-                              style={{
-                                height: "35px",
-                                width: "35px",
-                                objectFit: "cover",
-                                margin: "0px 5px",
-                                cursor: "pointer",
-                              }}
-                              src={
-                                "https://stagingapi.inventurs.in/" +
-                                item?.thumbnail
+                {totalWallpapers.length > 0 &&
+                  totalWallpapers
+                    .slice(startIndex, endIndex)
+                    .map((item, ind) => {
+                      return (
+                        <tr key={ind}>
+                          <td>
+                            <TagSelect tags={tags} item={item} />
+                          </td>
+                          <td>
+                            {" "}
+                            {/* <div className="table-input" key={ind}> */}
+                            <input
+                              placeholder={
+                                Number(item?.price) !== 0 ? item.price : "N.A"
                               }
+                              id={item._id}
+                              disabled={item.paid !== "PAID" ? true : false}
+                              style={{
+                                width: "100px",
+                                margin: "0.2rem",
+                                padding: "0.3rem",
+                                borderRadius: "4px",
+                                outline: "none",
+                                background:
+                                  item.paid === "PAID"
+                                    ? "rgba(112, 112, 112, 0.22)"
+                                    : "none",
+                                color: "rgb(131,131,131)",
+                                boxShadow:
+                                  item.paid !== "PAID"
+                                    ? "none"
+                                    : "2px 2px 4px rgba(0, 0, 0, 0.2)",
+                                transition: "box-shadow 0.3s ease-in-out",
+                                // color: item.paid !== "PAID" ? "#ccc" : "#000",
+                              }}
+                              onChange={async (e) => {
+                                const form = new FormData();
+                                form.append("price", Number(e.target.value));
+                                await axiosInstance({
+                                  method: "post",
+                                  url: `/api/wallpaper/update/${item._id}`,
+                                  data: form,
+                                  headers: {
+                                    headers: {
+                                      "Content-Type": "multipart/form-data",
+                                    },
+                                  },
+                                });
+                              }}
                             />
-                          </a>
-                          <span
-                            onClick={(e) => {
-                              e.preventDefault();
-                              // handleDownload(item?.thumbnail);
-                            }}
-                          >
-                            <i
-                              className="fa fa-download "
-                              aria-hidden="true"
-                              style={{ color: "#0d6efd", cursor: "pointer" }}
-                            ></i>
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex" key={ind}>
-                          <img
-                            style={{
-                              height: "35px",
-                              width: "35px",
-                              objectFit: "cover",
-                              margin: "0px 5px",
-                            }}
-                            src="https://mobimg.b-cdn.net/v3/fetch/05/05eeb93a2e41734ecb6044146351f11e.jpeg"
-                          />
-                          <a href={item?.file} download>
-                            <i
-                              className="fa fa-download "
-                              aria-hidden="true"
-                            ></i>
-                          </a>
-                        </div>
-                      </td>
-                      <td style={{ width: "300px !important" }}>
-                        <span>{item?.time}</span>
-                      </td>
-                      <td>
-                        <SingleSelect id={item._id} />
-                      </td>
-                      <td>
-                        <SingleSelectVisibility id={item._id} />
-                      </td>
-                      <td>{item?.ttl_downld}</td>
-                      <td>{item?.likes}</td>
-                    </tr>
-                  );
-                })}
+                            {/* </div> */}
+                          </td>
+                          <td>
+                            <SelectCategory
+                              categories={categories}
+                              item={item}
+                            />
+                          </td>
+                          <td>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                padding: "0.4rem 0.3rem",
+                                backgroundColor: "rgba(0, 0, 0, 0)",
+                                borderRadius: "4px",
+                                width: "100px",
+                                textAlign: "center",
+                              }}
+                            >
+                              <span
+                                id={item._id + "_color"}
+                                style={{
+                                  color: item.color_hex
+                                    ? item.color_hex
+                                    : "rgb(131,131,131)",
+                                  textAlign: "center",
+                                }}
+                              >
+                                {item.color_code ? item.color_code : "N.A"}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <SelectColorHex item={item} />
+                          </td>
+                          <td>{item.model}</td>
+                          <td>
+                            <div className="d-flex " key={ind}>
+                              <a
+                                href={`http://localhost:4000/${item?.thumbnail}`}
+                                download={item?.thumbnail}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <img
+                                  className="thumbnail_Image"
+                                  src={`http://localhost:4000/${item?.thumbnail}`}
+                                  alt="Thumbnail"
+                                  style={{
+                                    height: "50px",
+                                    width: "40px",
+                                    objectFit: "cover",
+                                    margin: "0px 5px",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              </a>
+
+                              <span
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  // handleDownload(item?.thumbnail);
+                                }}
+                              >
+                                <i
+                                  className="fa fa-download "
+                                  aria-hidden="true"
+                                  style={{
+                                    color: "#0d6efd",
+                                    cursor: "pointer",
+                                  }}
+                                ></i>
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex" key={ind}>
+                              <img
+                                style={{
+                                  height: "50px",
+                                  width: "40px",
+                                  objectFit: "cover",
+                                  margin: "0px 5px",
+                                }}
+                                alt="Thumbnail"
+                                src="https://mobimg.b-cdn.net/v3/fetch/05/05eeb93a2e41734ecb6044146351f11e.jpeg"
+                              />
+                              <a href={item?.file} download>
+                                <i
+                                  className="fa fa-download "
+                                  aria-hidden="true"
+                                ></i>
+                              </a>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="text-wrap">
+                              {item?.time.split(" ")[0]}
+                            </div>
+                            <div>{item?.time.split(" ")[1]}</div>
+                          </td>
+                          <td>
+                            <SingleSelect id={item._id} />
+                          </td>
+                          <td>
+                            <SingleSelectVisibility id={item._id} />
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            {item?.ttl_downld || "N.A."}
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            {item.main_size ? item.main_size : "N.A."}
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            {item.thumb_size ? item.thumb_size : "N.A."}
+                          </td>
+                          <td style={{ textAlign: "center" }}>{item?.likes}</td>
+                        </tr>
+                      );
+                    })}
               </tbody>
             </table>
+            {totalWallpapers.length === 0 && !loading && (
+              <div className="w-100 m-auto text-center">
+                <h1>NO DATA TO DISPLAY</h1>
+              </div>
+            )}
           </div>
           <div>
             <button
@@ -287,8 +427,9 @@ function WallpaperList() {
 
               return (
                 <button
-                  className={`pagination-btn${currentPage === page ? " active" : ""
-                    }`}
+                  className={`pagination-btn${
+                    currentPage === page ? " active" : ""
+                  }`}
                   key={i}
                   onClick={() => setCurrentPage(page)}
                   disabled={currentPage === page}
@@ -304,30 +445,85 @@ function WallpaperList() {
             >
               Next
             </button>
+            <input
+              type="text"
+              placeholder="Page.."
+              value={newPageNumber}
+              style={{
+                background: "none",
+                border: "1px solid rgba(0,0,0,0.2)",
+                width: "4rem",
+                padding: "0.3rem",
+                marginLeft: "4rem",
+                borderRadius: "6px",
+                color: "rgb(131,131,131)",
+              }}
+              onChange={(e) => {
+                setNewPageNumber(Number(e.target.value));
+              }}
+            />
+            <button
+              className="pagination-btn active"
+              onClick={() => {
+                if (newPageNumber > totalPages || newPageNumber === 0) {
+                  alert("No page exists");
+                  setNewPageNumber(currentPage);
+                } else {
+                  setCurrentPage(newPageNumber);
+                }
+              }}
+            >
+              Go
+            </button>
             <select
               defaultValue={""}
               style={{
                 position: "absolute",
-                right: "2rem",
-                outline: "none",
-                padding: "0.4rem 0.3rem",
+                right: "14rem",
+                padding: "0.7rem 0.3rem",
                 border: "1px solid rgba(0, 0, 0, 0.2)",
                 backgroundColor: "rgba(0, 0, 0, 0)",
-                borderRadius: "4px",
-                color: "rgb(131,131,131)"
+                color: "rgb(131,131,131)",
+                borderRadius: "7px",
+                outline: "none",
+              }}
+              onChange={(e) => {
+                setModel(e.target.value);
+              }}
+              value={model}
+            >
+              <option value={"4D"}>4D</option>
+              <option value={"4K"}>4K</option>
+              <option value={"live"}>Live</option>
+              <option value={"all"}>All</option>
+            </select>
+            <select
+              defaultValue={"Date Latest"}
+              style={{
+                position: "absolute",
+                right: "2rem",
+                padding: "0.7rem 0.3rem",
+                border: "1px solid rgba(0, 0, 0, 0.2)",
+                backgroundColor: "rgba(0, 0, 0, 0)",
+                color: "rgb(131,131,131)",
+                borderRadius: "7px",
+                outline: "none",
               }}
               onChange={(e) => {
                 setFilter(e.target.value);
               }}
+              value={filter}
             >
-              <option value={""}>None</option>
+              <option value="">No Filters</option>
+              <option value={"With Primary"}>With Primary</option>
+              <option value={"No Primary"}>No Primary</option>
               <option value={"No Category"}>No Category</option>
               <option value={"No Colors"}>No Colors</option>
               <option value={"No Tags"}>No Tag</option>
-              <option value={"Date Latest"}>Date Latest</option>
               <option value={"Date Oldest"}>Date Oldest</option>
-              <option value={"Paid"}>Paid</option>
-              <option value={"Free"}>Free</option>
+              <option value={"Date Latest"}>Date Latest</option>
+              <option value={"Like Up"}>Like Up</option>
+              <option value={"Like Down"}>Like Down</option>
               <option value={"Download Up"}>Download Up</option>
               <option value={"Download Down"}>Download Down</option>
               <option value={"Hide"}>Hidden</option>
@@ -348,7 +544,7 @@ const SingleSelect = ({ id }) => {
 
   useEffect(() => {
     const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
+      const response = await axiosInstance.post(`/api/wallpaper/list/${id}`);
       const data = response.data.wallpaper;
       setIsPaid(data.paid);
     };
@@ -359,12 +555,12 @@ const SingleSelect = ({ id }) => {
   const updateWallpaper = useCallback(
     async (_paid) => {
       try {
-        console.log(_paid);
+        // console.log(_paid);
         const form = new FormData();
         form.append("paid", _paid);
-        await axios({
+        await axiosInstance({
           method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
+          url: `/api/wallpaper/update/${id}`,
           data: form,
           headers: {
             headers: { "Content-Type": "multipart/form-data" },
@@ -379,24 +575,27 @@ const SingleSelect = ({ id }) => {
   const handleSelect = (e) => {
     setPaid(e.target.value);
     updateWallpaper(e.target.value);
-    if (paid != "PAID") {
+    if (paid !== "PAID") {
       document.getElementById(id).disabled = false;
+      document.getElementById(id).style.background = "rgba(112,112,112,0.22)";
     } else {
+      document.getElementById(id).value = 0;
       document.getElementById(id).disabled = true;
+      document.getElementById(id).background = "none";
     }
   };
 
   return (
-    <div id={id} style={{ width: 130 }}>
+    <div id={id} style={{ width: 80 }}>
       <select
         onChange={handleSelect}
         style={{
-          padding: "0.4rem 0.3rem",
+          padding: "0.7rem 0.3rem",
           border: "1px solid rgba(0, 0, 0, 0.2)",
           backgroundColor: "rgba(0, 0, 0, 0)",
+          color: "rgb(131,131,131)",
           borderRadius: "4px",
           width: "100%",
-          color: "rgb(131,131,131)"
         }}
       >
         <option value={"FREE"} selected={isPaid !== "PAID"}>
@@ -415,7 +614,7 @@ const SingleSelectVisibility = ({ id }) => {
 
   useEffect(() => {
     const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
+      const response = await axiosInstance.post(`/api/wallpaper/list/${id}`);
       const data = response.data.wallpaper;
 
       setHide(data.hide);
@@ -428,8 +627,8 @@ const SingleSelectVisibility = ({ id }) => {
   const updateWallpaper = useCallback(
     async (_hide) => {
       try {
-        // await axios.post(
-        //   `${base}/api/wallpaper/update/${id}`,
+        // await axiosInstance.post(
+        //   `/api/wallpaper/update/${id}`,
         //   {
         //     hide: _hide,
         //   },
@@ -440,16 +639,16 @@ const SingleSelectVisibility = ({ id }) => {
 
         const form = new FormData();
         form.append("hide", _hide);
-        await axios({
+        await axiosInstance({
           method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
+          url: `/api/wallpaper/update/${id}`,
           data: form,
           headers: {
             headers: { "Content-Type": "multipart/form-data" },
           },
         });
       } catch (err) {
-        console.log(err);
+        // console.log(err);
       }
     },
     [hidden]
@@ -462,16 +661,16 @@ const SingleSelectVisibility = ({ id }) => {
   };
   // console.log(isPaid)
   return (
-    <div id={id} style={{ width: 130 }}>
+    <div id={id} style={{ width: 70 }}>
       <select
         onChange={handleSelect}
         style={{
-          padding: "0.4rem 0.3rem",
+          padding: "0.7rem 0.3rem",
           border: "1px solid rgba(0, 0, 0, 0.2)",
           backgroundColor: "rgba(0, 0, 0, 0)",
           borderRadius: "4px",
           width: "100%",
-          color: "rgb(131,131,131)"
+          color: "rgb(131,131,131)",
         }}
       >
         <option value={"Yes"} selected={hide === "Yes"}>
@@ -485,40 +684,32 @@ const SingleSelectVisibility = ({ id }) => {
   );
 };
 
-const MultiSelecti = ({ tags, id }) => {
+const TagSelect = ({ tags, item }) => {
   const [prevTags, setPrevTags] = useState([]);
   const options = tags.map((item) => {
     return { label: item.tag, value: item._id };
   });
 
   useEffect(() => {
-    const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
-      const data = response.data.wallpaper;
-      setPrevTags(data.tag);
-    };
-    getData();
+    setPrevTags(item.tag);
   }, []);
   const [newTags, setNewTags] = useState([]);
-  const updateWallpaper = useCallback(
-    async (_tags) => {
-      try {
-        const form = new FormData();
-        form.append("tag", _tags);
-        await axios({
-          method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
-          data: form,
-          headers: {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        });
-      } catch (err) {
-        // console.log(err);
-      }
-    },
-    [newTags]
-  );
+  const updateWallpaper = useCallback(async (_tags) => {
+    try {
+      const form = new FormData();
+      form.append("tag", _tags);
+      await axiosInstance({
+        method: "post",
+        url: `/api/wallpaper/update/${item._id}`,
+        data: form,
+        headers: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      });
+    } catch (err) {
+      // console.log(err);
+    }
+  }, []);
   const handleSelect = (selectedList) => {
     const newTags = selectedList.map((item) => item.value);
     setNewTags(newTags);
@@ -526,8 +717,9 @@ const MultiSelecti = ({ tags, id }) => {
   };
 
   return (
-    <div style={{ width: "100%", border: "none" }}>
+    <div style={{ width: "180px", border: "none" }}>
       <Select
+        placeholder="Select Tags"
         defaultValue={prevTags}
         options={options}
         onChange={handleSelect}
@@ -536,9 +728,17 @@ const MultiSelecti = ({ tags, id }) => {
           control: (baseStyles, state) => ({
             ...baseStyles,
             backgroundColor: "rgb(0 0 0 / 0%)",
-            color: "hsl(0, 0%, 20%)",
+            color: "white",
             border: "1px solid rgba(0, 0, 0, 0.2)",
-            width: "max-content"
+          }),
+          option: (provided, state) => ({
+            ...provided,
+            display: "flex",
+            alignItems: "center",
+            padding: "0.7rem 0.5rem",
+            position: "relative",
+            backgroundColor: "white",
+            color: "black",
           }),
         }}
       />
@@ -546,40 +746,32 @@ const MultiSelecti = ({ tags, id }) => {
   );
 };
 
-const SelectCategory = ({ categories, id }) => {
+const SelectCategory = ({ categories, item }) => {
   const [cat_name, setCatName] = useState(null);
-  const options = categories.map((item) => {
-    return { label: item.cat_name, value: item._id };
+  const options = categories.map((option) => {
+    return { label: option.cat_name, value: option._id };
   });
 
   useEffect(() => {
-    const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
-      const data = response.data.wallpaper;
-      setCatName(data.cat_name);
-    };
-    getData();
-  }, [id]);
+    setCatName(item.cat_name);
+  }, [item.cat_name]);
 
-  const updateWallpaper = useCallback(
-    async (_cat_name) => {
-      try {
-        const form = new FormData();
-        form.append("cat_name", _cat_name);
-        await axios({
-          method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
-          data: form,
-          headers: {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        });
-      } catch (err) {
-        // console.log(err);
-      }
-    },
-    [cat_name, id]
-  );
+  const updateWallpaper = useCallback(async (_cat_name) => {
+    try {
+      const form = new FormData();
+      form.append("cat_name", _cat_name);
+      await axiosInstance({
+        method: "post",
+        url: `/api/wallpaper/update/${item._id}`,
+        data: form,
+        headers: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      });
+    } catch (err) {
+      // console.log(err);
+    }
+  }, []);
 
   const handleSelect = (selectedItem) => {
     setCatName(selectedItem);
@@ -587,18 +779,18 @@ const SelectCategory = ({ categories, id }) => {
   };
 
   return (
-    <div id={id} style={{ width: "100%", border: "none" }}>
+    <div id={item._id} style={{ width: "100%", border: "none", margin: "0" }}>
       {cat_name != null ? (
         <select
           value={cat_name}
           onChange={(e) => handleSelect(e.target.value)}
           style={{
-            padding: "0.4rem 0.3rem",
+            padding: "0.7rem 0.3rem",
             border: "1px solid rgba(0, 0, 0, 0.2)",
             backgroundColor: "rgba(0, 0, 0, 0)",
             borderRadius: "4px",
-            width: "fit-content",
-            color: "rgb(131,131,131)"
+            width: "180px",
+            color: "rgb(131,131,131)",
           }}
         >
           {" "}
@@ -612,21 +804,24 @@ const SelectCategory = ({ categories, id }) => {
           ))}
         </select>
       ) : (
-        <select style={{
-          padding: "0.4rem 0.3rem",
-          border: "1px solid rgba(0, 0, 0, 0.2)",
-          backgroundColor: "rgba(0, 0, 0, 0)",
-          borderRadius: "4px",
-          width: "fit-content",
-          color: "rgb(131,131,131)"
-        }}><option key={""} value={"none"}>
+        <select
+          style={{
+            padding: "0.7rem 0.3rem",
+            border: "1px solid rgba(0, 0, 0, 0.2)",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            borderRadius: "4px",
+            width: "180px",
+            color: "rgb(131,131,131)",
+          }}
+        >
+          <option key={""} value={"none"}>
             Select Category
-          </option></select>
+          </option>
+        </select>
       )}
     </div>
   );
 };
-
 
 const customStyles = {
   control: (provided) => ({
@@ -646,14 +841,14 @@ const customStyles = {
     position: "relative",
     backgroundColor: "rgba(120, 120, 120, 0.68)",
     color: state.data.color,
-    fontWeight: "bold"
+    fontWeight: "bold",
   }),
   singleValue: (provided, state) => ({
     ...provided,
     color: state.data.color,
     fontWeight: "bold",
-    fontSize: "1rem"
-  })
+    fontSize: "1rem",
+  }),
 };
 
 const SelectColor = ({ colors, id }) => {
@@ -662,12 +857,12 @@ const SelectColor = ({ colors, id }) => {
     { label: "No Color", color: "#fff", value: "none" }, // default option
     ...colors.map((item) => {
       return { label: item.name, color: item.hash_code, value: item.name };
-    })
-  ];  
+    }),
+  ];
 
   useEffect(() => {
     const getData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
+      const response = await axiosInstance.post(`/api/wallpaper/list/${id}`);
       const data = response.data.wallpaper;
       setColorCode(data.color_code);
     };
@@ -679,9 +874,9 @@ const SelectColor = ({ colors, id }) => {
       try {
         const form = new FormData();
         form.append("color_code", _color_code);
-        await axios({
+        await axiosInstance({
           method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
+          url: `/api/wallpaper/update/${id}`,
           data: form,
           headers: {
             headers: { "Content-Type": "multipart/form-data" },
@@ -711,11 +906,14 @@ const SelectColor = ({ colors, id }) => {
   );
 };
 
-
-const SelectColorHex = ({ id }) => {
+const SelectColorHex = ({ item }) => {
+  const [opened, setOpened] = useState(false);
+  const [displayMode, setDisplayMode] = useState("colorwheel");
   const [colorHex, setColorHex] = useState("#000000");
+  const [colorName, setColorName] = useState("");
   const [hsva, setHsva] = useState({ h: 0, s: 0, v: 68, a: 1 });
   const [pickerVisible, setPickerVisible] = useState(false);
+  const id = item._id;
   const hexToHsva = (hexColor, alpha = 1) => {
     // Convert hex to RGB
     const red = parseInt(hexColor.slice(1, 3), 16);
@@ -752,90 +950,206 @@ const SelectColorHex = ({ id }) => {
     return hsva;
   };
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axios.post(`${base}/api/wallpaper/list/${id}`);
-      const data = response.data.wallpaper;
-      if (data.color_hex) {
-        const hsva = hexToHsva(data.color_hex);
-        setColorHex(data.color_hex);
-        setHsva(hsva);
-      }
-    };
-    fetchData();
+    if (item.color_hex) {
+      const hsva = hexToHsva(item.color_hex);
+      setColorHex(item.color_hex);
+      setHsva(hsva);
+    }
   }, []);
 
   const handleColorChange = (color) => {
     const hsva = color.hsva;
     setHsva(hsva);
     setColorHex(color.hex);
+    const n_match = ntc.name(color.hex);
+    let color_name = n_match[1];
+    setColorName(color_name);
   };
 
-  const handleOkClick = useCallback(() => {
+  const handleOkClick = () => {
     updateWallpaper(colorHex);
     setPickerVisible(false);
-  }, [colorHex]);
+  };
 
-  const updateWallpaper = useCallback(
-    async (colorHex) => {
+  const updateWallpaper = async (color_Hex) => {
+    try {
+      document.getElementById(id + "_color").innerHTML = `${colorName}`;
+      document.getElementById(
+        id + "_color"
+      ).style.color = `${colorHex} !important`;
+      const form = new FormData();
+      form.append("color_hex", color_Hex);
+      form.append("color_code", colorName);
+      await axiosInstance({
+        method: "post",
+        url: `/api/wallpaper/update/${item._id}`,
+        data: form,
+        headers: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      });
+      // AddHexColor(colorHex);
       try {
-        const form = new FormData();
-        form.append("color_hex", colorHex);
-        await axios({
-          method: "post",
-          url: `${base}/api/wallpaper/update/${id}`,
-          data: form,
-          headers: {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
+        await axiosInstance.post(`/api/color/create`, {
+          color_code: color_Hex,
         });
-        AddHexColor(colorHex);
-      } catch (err) {
-        // console.log(err);
+        successPopup("Color created successfully");
+        await axiosInstance.post(`/api/color/list`);
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          infoPopup("Color already exists");
+        } else {
+          errorPopup("Failed to create color");
+        }
       }
-    },
-    [id]
-  );
+    } catch (err) {
+      // console.log(err);
+    }
+  };
 
   const colorButton = (
     <div
+      className="d-flex"
       style={{
-        width: "32px",
-        height: "32px",
-        backgroundColor: colorHex,
-        borderRadius: "50%",
-        cursor: "pointer",
+        width: "100%",
+        alignItems: "center",
+        marginLeft: "0.5rem",
+        justifyContent: "space-between",
+        color: "rgb(131,131,131)",
       }}
-      onMouseEnter={() => {
-        setPickerVisible((pickerVis) => (pickerVis ? false : true));
-      }}
-    />
+    >
+      <div
+        id={id + "_color_btn"}
+        style={{
+          width: "42px",
+          height: "42px",
+          margin: "4px",
+          backgroundColor: colorHex,
+          cursor: "pointer",
+          borderRadius: "50%",
+        }}
+        onMouseEnter={() => {
+          setPickerVisible(pickerVisible ? false : true);
+        }}
+      />
+    </div>
   );
+  const handleModeChange = (mode) => {
+    setDisplayMode(mode);
+    setPickerVisible(true);
+  };
 
+  const pickerMenu = (
+    <div className="d-flex">
+      <button
+        className="btn btn-sm btn-primary m-2"
+        onClick={() => handleModeChange("colorwheel")}
+      >
+        Color Wheel
+      </button>
+      <button
+        className="btn btn-sm btn-primary m-2"
+        onClick={() => handleModeChange("eyedropper")}
+      >
+        Eyedropper
+      </button>
+    </div>
+  );
   return (
-    <div id={id} style={{ display: "flex", alignItems: "center" }}>
+    <div
+      id={item._id}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        borderRadius: "50%",
+      }}
+    >
       {colorButton}
-      {pickerVisible && (
+      {pickerVisible && displayMode === "colorwheel" ? (
         <div
           style={{
             position: "absolute",
-            // marginLeft: "2rem",
+            marginLeft: "-1rem",
             background: "#181818E6",
             padding: "2rem",
             borderRadius: "30px",
             zIndex: 30,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center"
+            justifyContent: "center",
+            alignItems: "center",
           }}
-          onMouseLeave={() => { setPickerVisible(false); }}
+          onMouseLeave={() => {
+            setPickerVisible(false);
+          }}
         >
+          {pickerMenu}
           <Wheel color={hsva} onChange={handleColorChange} />
-          <button className="btn btn-sm m-2 btn-primary" onClick={handleOkClick}>
+          <button
+            className="btn btn-primary btn-sm m-3"
+            onClick={handleOkClick}
+            style={{ width: "80%" }}
+          >
             OK
           </button>
         </div>
+      ) : (
+        ""
+      )}
+      {pickerVisible && displayMode === "eyedropper" ? (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              marginLeft: "-1rem",
+              background: "#181818E6",
+              padding: "2rem",
+              borderRadius: "30px",
+              zIndex: 30,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+            onMouseLeave={() => {
+              if (!opened) {
+                setPickerVisible(false);
+              }
+            }}
+          >
+            {pickerMenu}
+            <input
+              type="color"
+              id="selectcolorinput"
+              value={colorHex}
+              onChange={(e) => {
+                const hexColor = e.target.value;
+                const hsva = hexToHsva(hexColor);
+                setColorHex(hexColor);
+                setHsva(hsva);
+              }}
+              onClick={() => {
+                setOpened(opened ? false : true);
+              }}
+              style={{ width: "80%", height: "2rem", margin: "1rem" }}
+            />
+            <button
+              className="btn btn-primary btn-sm m-3"
+              onClick={() => {
+                handleOkClick();
+                setPickerVisible(false);
+                setOpened(false);
+              }}
+              style={{ width: "80%" }}
+            >
+              OK
+            </button>
+          </div>
+        </>
+      ) : (
+        ""
       )}
     </div>
   );
 };
+
 export default WallpaperList;

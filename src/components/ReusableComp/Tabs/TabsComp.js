@@ -1,11 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-const TabsComp = ({ Tabs }) => {
-  const remSpace = (text) => {
-    return text.split(" ").join("-").replace(/\d+/g, '');
+const TabsComp = ({ Tabs, type }) => {
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("activeTab") || 0
+  );
+  const [subordinateTab, setSubordinateTab] = useState(
+    localStorage.getItem("subordinateTab") || 0
+  );
+
+  useEffect(() => {
+    localStorage.setItem("activeTab", activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem("subordinateTab", subordinateTab);
+  }, [subordinateTab]);
+
+  const handleTabClick = (index) => {
+    if (type === "main") {
+      setActiveTab(index);
+    } else {
+      setSubordinateTab(index);
+    }
   };
+
   return (
-    <div className="w-80 m-auto bg-dark">
+    <div className="m-auto bg-dark">
       <div className="row my-3">
         <div className="col-md-12">
           <div className="card">
@@ -16,9 +36,13 @@ const TabsComp = ({ Tabs }) => {
                     return (
                       <li key={ind} className="nav-item">
                         <a
-                          className={`nav-link ${ind === 0 && "active"}`}
-                          href={`#${remSpace(item.name)}`}
-                          data-toggle="tab"
+                          className={`nav-link ${
+                            type === "main"
+                              ? ind === parseInt(activeTab) && "active"
+                              : ind === parseInt(subordinateTab) && "active"
+                          }`}
+                          href={`#${item.id}`}
+                          onClick={() => handleTabClick(ind)}
                         >
                           {item.name}
                         </a>
@@ -34,8 +58,12 @@ const TabsComp = ({ Tabs }) => {
                     return (
                       <div
                         key={ind}
-                        className={`tab-pane ${ind === 0 && "active"}`}
-                        id={remSpace(item.name)}
+                        className={`tab-pane ${
+                          type === "main"
+                            ? ind === parseInt(activeTab) && "active"
+                            : ind === parseInt(subordinateTab) && "active"
+                        } `}
+                        id={item.id}
                       >
                         {item.comp}
                       </div>

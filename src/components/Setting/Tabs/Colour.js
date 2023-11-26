@@ -4,24 +4,18 @@ import ColorList from "./Color/ColorList";
 import ColorAdd from "./Color/ColorAdd";
 import { fetchColors } from "../../../functions/functions.ts";
 
-const Colour = () => {
-  const [colors, setColors] = useState([]);
-  useEffect(() => {
-    fetchColors(setColors);
-  }, []);
-  // const [hexColors, setHexColors] = useState([])
-  // useEffect(()=>{
-  //   fetchHexColors(setHexColors)
-  // }, [])
-
+const Colour = ({ colors, setColors }) => {
   const Tabs = [
     {
       name: "Color Name",
       comp: <ColorList colors={colors} setColors={setColors} />,
+      id: "color-name",
+      active: true
     },
     {
       name: "Add Color Name",
       comp: <ColorAdd setColor={setColors} />,
+      id: "color-list"
     },
     // {
     //   name: "Color Hex",

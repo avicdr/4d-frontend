@@ -32,6 +32,11 @@ function TagCreate({ setTags }) {
               onChange={handleChange}
               className={`form-control ${invalidClass}`}
               placeholder="Enter Tag Name"
+              style={{
+                background: "none",
+                border: "1px solid rgba(131, 131,131,0.2)",
+                color: "white"
+              }}
             />
           </div>
           <div className="form-group">

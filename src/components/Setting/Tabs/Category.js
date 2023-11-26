@@ -13,10 +13,13 @@ const Category = () => {
     {
       name: "Categories",
       comp: <CategoryListSettings data={data} setData={setData} />,
+      id: "categories-list",
+      active: true
     },
     {
       name: "Add Category",
       comp: <CategoryCreate setData={setData} />,
+      id: "add-category"
     },
   ];
   return (

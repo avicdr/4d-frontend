@@ -11,14 +11,15 @@ function Dashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [paidUser, setPaidUser] = useState(0);
   const [freeUser, setFreeUser] = useState(0);
-  const [subscriptionUser, setSubscriptionUser] = useState(0);
-  const [coinsGiven, setCoinsGiven] = useState(0);
-  const [oneTimePaid, setOneTimePaid] = useState(0);
+  // const [subscriptionUser, setSubscriptionUser] = useState(0);
+  // const [coinsGiven, setCoinsGiven] = useState(0);
+  // const [oneTimePaid, setOneTimePaid] = useState(0);
   const [_4d, set4d] = useState(0);
   const [_4k, set_4k] = useState(0);
   const [live, setLive] = useState(0);
   const [_4dPaid, set4dPaid] = useState(0);
   const [livePaid, setLivePaid] = useState(0);
+  const [_4kPaid, set4kPaid] = useState(0);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (_4k === 0 || _4d === 0 || live === 0) {
@@ -30,7 +31,9 @@ function Dashboard() {
   const getData = async () => {
     const PaidUserResponse = await axiosInstance.post(`/api/admin/users/paid`);
     setPaidUser(PaidUserResponse.data.paid_total);
-    const totalUserResponse = await axiosInstance.post(`/api/admin/users/total`);
+    const totalUserResponse = await axiosInstance.post(
+      `/api/admin/users/total`
+    );
     setTotalUsers(totalUserResponse.data.total_user);
     const FreeUserResponse = await axiosInstance.post(`/api/admin/users/free`);
     setFreeUser(FreeUserResponse.data.free_total);
@@ -46,6 +49,19 @@ function Dashboard() {
       `/api/search/total/live`
     );
     setLive(liveWallpaperResponse.data.Wallpaper.length);
+
+    const _4kPaidWallpaperResponse = await axiosInstance.post(
+      `/api/admin/wallpaper/4kPaid`
+    );
+    set4kPaid(_4kPaidWallpaperResponse.data.wallpaper_total);
+    const _4dPaidWallpaperResponse = await axiosInstance.post(
+      `/api/admin/wallpaper/4dPaid`
+    );
+    set4dPaid(_4dPaidWallpaperResponse.data.wallpaper_total);
+    const livePaidWallpaperResponse = await axiosInstance.post(
+      `/api/admin/wallpaper/livePaid`
+    );
+    setLivePaid(livePaidWallpaperResponse.data.wallpaper_total);
   };
 
   useEffect(() => {
@@ -71,9 +87,8 @@ function Dashboard() {
         <div className="content-wrapper p-4">
           <div className="row">
             <div className="col-md-12">
-              <main className="cont-grey w-80 m-auto rounded">
-                <div className="w-80 m-auto cont-grey m-4 px-5 pb-5 pt-3 rounded">
-
+              <main className="cont-grey w-85 m-auto rounded">
+                <div className="w-100 m-auto cont-grey m-4 px-5 pb-5 pt-3 rounded">
                   {/* <h1 className="mt-4">Dashboard</h1> */}
                   <div
                     className=""
@@ -84,7 +99,7 @@ function Dashboard() {
                       backgroundColor: "rgb(0 0 0 / 18%)",
                       borderRadius: "4px",
                       width: "100%",
-                      color: "rgb(231,231,231)", outline: "none"
+                      color: "rgb(231,231,231)",
                     }}
                   >
                     Dashboard
@@ -109,7 +124,7 @@ function Dashboard() {
                       </div>
                       <div className="">
                         <div className="customCard text-white px-4 py-2">
-                          <h1 style={{ marginBottom: "0" }}>2,698</h1>
+                          <h1 style={{ marginBottom: "0" }}>0</h1>
                           <p
                             className="small"
                             style={{
@@ -124,7 +139,7 @@ function Dashboard() {
                       </div>
                       <div className="">
                         <div className="customCard text-white px-4 py-2">
-                          <h1 style={{ marginBottom: "0" }}>{_4k}</h1>
+                          <h1 style={{ marginBottom: "0" }}>0</h1>
                           <p
                             className="small"
                             style={{
@@ -133,9 +148,10 @@ function Dashboard() {
                               marginBottom: "0",
                             }}
                           >
-                            4K
+                            Subscription User
                           </p>
                         </div>
+                        
                       </div>
                     </div>
                     <div className="d-flex flex-wrap gap-2">
@@ -155,8 +171,8 @@ function Dashboard() {
                         </div>
                       </div>
                       <div className="">
-                        <div className="customCard text-white px-4 py-2">
-                          <h1 style={{ marginBottom: "0" }}>1,268</h1>
+                      <div className="customCard text-white px-4 py-2">
+                          <h1 style={{ marginBottom: "0" }}>{_4k}</h1>
                           <p
                             className="small"
                             style={{
@@ -165,13 +181,13 @@ function Dashboard() {
                               marginBottom: "0",
                             }}
                           >
-                            Subscription User
+                            4K
                           </p>
                         </div>
                       </div>
                       <div className="">
                         <div className="customCard text-white px-4 py-2">
-                          <h1 style={{ marginBottom: "0" }}>1,268</h1>
+                          <h1 style={{ marginBottom: "0" }}>{_4kPaid}</h1>
                           <p
                             className="small"
                             style={{
@@ -180,7 +196,7 @@ function Dashboard() {
                               marginBottom: "0",
                             }}
                           >
-                            xxxx
+                            4K Paid
                           </p>
                         </div>
                       </div>
@@ -218,7 +234,7 @@ function Dashboard() {
                       </div>
                       <div className="">
                         <div className="customCard text-white px-4 py-2">
-                          <h1 style={{ marginBottom: "0" }}>3,698</h1>
+                          <h1 style={{ marginBottom: "0" }}>{_4dPaid}</h1>
                           <p
                             className="small"
                             style={{
@@ -235,7 +251,7 @@ function Dashboard() {
                     <div className="d-flex flex-wrap gap-2">
                       <div className="">
                         <div className="customCard text-white px-4 py-2">
-                          <h1 style={{ marginBottom: "0" }}>3,698</h1>
+                          <h1 style={{ marginBottom: "0" }}>30</h1>
                           <p
                             className="small"
                             style={{
@@ -265,7 +281,7 @@ function Dashboard() {
                       </div>
                       <div className="">
                         <div className="customCard text-white px-4 py-2">
-                          <h1 style={{ marginBottom: "0" }}>1,268</h1>
+                          <h1 style={{ marginBottom: "0" }}>{livePaid}</h1>
                           <p
                             className="small"
                             style={{
@@ -281,7 +297,7 @@ function Dashboard() {
                     </div>
                   </div>
                   <div className="d-flex mt-4" style={{ gap: "12.5px" }}>
-                    <Link to="/category">
+                    <Link to="/settings#add-category">
                       <button
                         className="btn"
                         style={{
@@ -296,7 +312,7 @@ function Dashboard() {
                         Add Category
                       </button>
                     </Link>
-                    <Link to="/tags">
+                    <Link to="/settings#add-tag">
                       <button
                         className="btn"
                         style={{

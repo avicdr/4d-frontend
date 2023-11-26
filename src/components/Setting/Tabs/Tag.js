@@ -13,10 +13,13 @@ const Tag = () => {
     {
       name: "Tags",
       comp: <TagListSettings data={tags} setData={setTags} />,
+      id: "tag-list",
+      active: true,
     },
     {
       name: "Add Tag",
       comp: <TagCreate setTags={setTags} />,
+      id: "add-tag"
     },
   ];
 

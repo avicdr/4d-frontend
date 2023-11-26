@@ -185,3 +185,17 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background-color: #7f7f7f;
 }
+
+.thumbnail_Image:hover {
+  border-radius: 12px;
+  transform: scale(3.5);
+  transition: transform 0.5s ease-in-out;
+}
+
+.table td{
+  vertical-align: middle;
+}
+
+.w-85{
+  width: 85vw !important;
+}

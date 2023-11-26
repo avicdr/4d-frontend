@@ -28,7 +28,7 @@ function BannerList({ data, setData }) {
       name: "Image",
       cell: (row) => (
         <img
-          src={"https://stagingapi.inventurs.in/" + row.bannerLocation}
+          src={"http://localhost:4000/" + row.bannerLocation}
           alt={"Image"}
           width={100}
         />

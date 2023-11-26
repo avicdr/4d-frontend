@@ -1,9 +1,9 @@
 import React from 'react'
 import Grid from '../../ReusableComp/Unlisted/Grid'
 
-const UnlistedLive = () => {
+const UnlistedLive = ({setColors}) => {
   return (
-    <Grid Heading="Live Unlisted" model={"live"}/>
+    <Grid Heading="Live Unlisted" setClrs={setColors} model={"live"}/>
   )
 }
 

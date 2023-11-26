@@ -28,7 +28,7 @@ const Topic = () => {
             {moment().format('DD/MM/YYYY')}
         </td>
         <td>
-          <button className="btn btn-yellow">SEND</button>
+          <button className="btn btn-warning">SEND</button>
         </td>
       </tr>
     </tbody>

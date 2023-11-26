@@ -13,10 +13,13 @@ const HomeBanner = () => {
     {
       name: "Banners",
       comp: <BannerList data={banners} setData={setBanners} />,
+      id: "home-banners",
+      active: true
     },
     {
       name: "Add Banner",
       comp: <BannerCreate setData={setBanners} />,
+      id: "home-banners-create"
     },
   ];
   return <TabsComp Tabs={Tabs} />;

@@ -13,14 +13,18 @@ const HomePages = () => {
     {
       name: "Change Positions",
       comp: <Positions/>,
+      id:"change-positions",
+      active: true
     },
     {
       name: "Create Custom Category",
       comp: <CustomCategoryCreate setCustomCategories={setData}/>,
+      id: "create-custom-category"
     },
     {
       name: "Update Custom Category",
       comp: <CustomCategoryUpdate data={data} />,
+      id: "update-custom"
     },
   ];
   return (<TabsComp Tabs={Tabs} />);

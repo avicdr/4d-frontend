@@ -1,16 +1,23 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import NotificationHistory from "./NotificationHistory";
 import SendNotification from "./SendNotification";
 import ActivityType from "./ActivityType";
 import Topic from "./Topic";
+import { getNotifications } from "../../functions/functions.ts";
+import { ToastContainer } from "react-toastify";
 
 const Notification = () => {
-  console.log("run")
+  const [data, setData] = useState([])
+  
+  useEffect(()=>{
+    getNotifications(setData)
+  }, [])
   return (
     <div className="content-wrapper">
+      <ToastContainer/>
       <div className="row">
         <div className="col-md-12">
-          <div className="container">
+          <div className="w-85 m-auto">
             <div className="row my-3">
               <div className="col-md-12">
                 <div className="card">
@@ -28,24 +35,10 @@ const Notification = () => {
                       <li className="nav-item">
                         <a
                           className="nav-link"
-                          href="#send_noti"
+                          href="#send_notification"
                           data-toggle="tab"
                         >
                           Send Notification
-                        </a>
-                      </li>
-                      <li className="nav-item">
-                        <a
-                          className="nav-link"
-                          href="#noti_type"
-                          data-toggle="tab"
-                        >
-                          Acivity Type
-                        </a>
-                      </li>{" "}
-                      <li className="nav-item">
-                        <a className="nav-link" href="#topic" data-toggle="tab">
-                          Topic
                         </a>
                       </li>
                     </ul>
@@ -53,17 +46,11 @@ const Notification = () => {
                   <div className="card-body">
                     <div className="tab-content">
                       <div className="tab-pane active" id="notificationhistory">
-                        <NotificationHistory />
+                        <NotificationHistory data={data} setData={setData}/>
                       </div>
-                      <div className="tab-pane " id="send_noti">
-                        <SendNotification />
+                      <div className="tab-pane " id="send_notification">
+                        <SendNotification setData={setData}/>
                       </div>{" "}
-                      <div className="tab-pane " id="noti_type">
-                        <ActivityType />
-                      </div>{" "}
-                      <div className="tab-pane " id="topic">
-                        <Topic />
-                      </div>
                     </div>
                   </div>
                 </div>

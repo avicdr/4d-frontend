@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance, { base } from "../../../functions/functions.ts";
-import axios from "axios";
+import { ToastContainer } from "react-toastify";
+import { successPopup } from "../../../functions/popupMessages.js";
 
 function Positions() {
   // const [tagPosition, setTagPosition] = useState("0");
   // const [colorPosition, setColorPosition] = useState("0");
   const [trendingPosition, setTrendingPosition] = useState("0");
-  const [trendingVisibility, setTrendingVisibility] = useState(true);
+  const [trendingVisibility, setTrendingVisibility] = useState(false);
   const [newAddedPosition, setNewAddedPosition] = useState("0");
-  const [newAddedVisibility, setNewAddedVisibility] = useState(true);
+  const [newAddedVisibility, setNewAddedVisibility] = useState(false);
   const [customPosition, setCustomPosition] = useState("0");
-  const [customVisibility, setCustomVisibility] = useState("0");
+  const [customVisibility, setCustomVisibility] = useState(false);
   const fetchData = async () => {
     const response = await axiosInstance.post(`/api/home/status`);
     const data = response.data.status;
@@ -34,10 +35,12 @@ function Positions() {
       newlyAddedVisibility: newAddedVisibility,
       customVisibility: customVisibility,
     });
+    successPopup("Settings updated successfully")
   };
   useEffect(() => {
     fetchData();
   }, []);
+
   const styles = {
     padding: "0.8rem 0.8rem",
     borderRadius: "5px",
@@ -49,6 +52,7 @@ function Positions() {
   };
   return (
     <>
+    <ToastContainer/>
       <div className="d-flex flex-column">
         <h3>Change Positions</h3>
         <div className="d-flex flex-column m-2">
@@ -87,7 +91,7 @@ function Positions() {
             <input
               type="checkbox"
               id="mycheck"
-              value={newAddedVisibility}
+              checked={newAddedVisibility}
               onChange={(event) => setNewAddedVisibility(event.target.checked)}
             ></input>
           </span>
@@ -116,7 +120,7 @@ function Positions() {
             <input
               type="checkbox"
               id="mycheck"
-              value={customVisibility}
+              checked={customVisibility}
               onChange={(event) => setCustomVisibility(event.target.checked)}
             ></input>
           </span>

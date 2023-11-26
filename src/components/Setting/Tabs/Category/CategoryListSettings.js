@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import Dropzone, { useDropzone } from "react-dropzone";
-import {
+import axiosInstance, {
   handleCategoryDelete,
   base,
   editCategory,
@@ -15,19 +15,16 @@ function CategoryList({ data, setData }) {
   const fetchWallpaperCount = async (categoryId) => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${base}/api/category/wallpaper-count/${categoryId}`,
+      const response = await axiosInstance.post(
+        `/api/category/wallpaper-count/${categoryId}`,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-      const data = await response.json();
-      return data.wallpaper_count_category;
+      return response.data.wallpaper_count_category;
     } catch (error) {
-      console.error(error);
     }
   };
 
@@ -92,9 +89,8 @@ function CategoryList({ data, setData }) {
         return (
           <img
             src={"https://stagingapi.inventurs.in/" + row.thumbnail}
-            alt={"Image"}
-            style={{ width: "50px", borderRadius: "30px" }}
-            width={100}
+            alt="logo"
+            style={{ width: "40px", borderRadius: "50%", height:"40px", margin: "6px" }}
           />
         );
       },
@@ -191,7 +187,7 @@ function CategoryList({ data, setData }) {
             role="dialog"
           >
             <div className="modal-dialog">
-              <div className="modal-content">
+              <div className="modal-content" style={{background: "rgba(131,131,131, 0.2)"}}>
                 <div className="modal-header">
                   <h4 className="modal-title">Edit Category</h4>
                   <button
@@ -200,7 +196,7 @@ function CategoryList({ data, setData }) {
                     data-dismiss="modal"
                     aria-label="Close"
                   >
-                    <span aria-hidden="true">×</span>
+                    <span aria-hidden="true"></span>
                   </button>
                 </div>
                 <div className="modal-body">
@@ -211,6 +207,7 @@ function CategoryList({ data, setData }) {
                     name="name"
                     className="form-control"
                     placeholder="Enter Category Name"
+                    style={{background: "none", color: "white"}}
                   />
                   <Dropzone>
                     {() => (
@@ -242,7 +239,7 @@ function CategoryList({ data, setData }) {
                 <div className="modal-footer justify-content-between">
                   <button
                     type="button"
-                    className="btn btn-default"
+                    className="btn btn-secondary"
                     data-dismiss="modal"
                   >
                     Close

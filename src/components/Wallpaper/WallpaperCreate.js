@@ -2,14 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SliderPicker } from "react-color";
 import Dropzone, { useDropzone } from "react-dropzone";
 import { MultiSelect } from "react-multi-select-component";
-import axios from "axios";
-import { createWallpaper, base, fetchTags } from "../../functions/functions.ts";
+import axiosInstance, { createWallpaper } from "../../functions/functions.ts";
 
 function WallpaperCreate() {
   const [colour, setcolour] = useState("");
   const [colorsArray, setColorsArray] = useState([]);
   const [categoryArray, setCategoryArray] = useState([]);
-  const [metaTitle, setMetaTitle] = useState("");
   const [mainFile, setMainFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [isPaid, setisPaid] = useState(false);
@@ -18,11 +16,8 @@ function WallpaperCreate() {
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState([]);
   const [tag, setTag] = useState("");
-  const [hexColors, setHexColors] = useState([]);
-  const [hexColor, setHexColor] = useState([]);
-
   const populateCategory = async () => {
-    const response = await axios.post(`${base}/api/category/list`);
+    const response = await axiosInstance.post(`/api/category/list`);
     const formattedData = response.data.category.map((category) => ({
       cat_name: category.cat_name,
       _id: category._id,
@@ -30,7 +25,7 @@ function WallpaperCreate() {
     setCategoryArray(formattedData);
   };
   const populateColors = async () => {
-    const response = await axios.post(`${base}/api/color/list`);
+    const response = await axiosInstance.post(`/api/color/list`);
     const formattedData = response.data.color.map((color) => ({
       color: color.name,
       _id: color._id,
@@ -38,21 +33,12 @@ function WallpaperCreate() {
     setColorsArray(formattedData);
   };
   const populateTags = async () => {
-    const response = await axios.post(`${base}/api/tag/list`);
+    const response = await axiosInstance.post(`/api/tag/list`);
     const formattedData = response.data.tag.map((tag) => ({
       tag: tag.tag,
       _id: tag._id,
     }));
     setTags(formattedData);
-  };
-
-  const populateHexColors = async () => {
-    const response = await axios.post(`${base}/api/hex-color/list`);
-    const formattedData = response.data.color.map((color) => ({
-      hex: color.hex,
-      _id: color._id,
-    }));
-    setHexColors(formattedData);
   };
 
   const onDropMainFile = useCallback((acceptedFiles) => {
@@ -69,13 +55,11 @@ function WallpaperCreate() {
       category: category,
       price,
       color_code: colour,
-      color_hex: hexColor,
-      metaTitle: metaTitle,
       paid: isPaid,
       file: mainFile,
       thumbnail: thumbnailFile,
       model: model,
-      tag_id: tag,
+      tag: tag,
     });
     // createWallpaper({
     //   category: selected,
@@ -85,7 +69,6 @@ function WallpaperCreate() {
     colour,
     isPaid,
     mainFile,
-    metaTitle,
     model,
     price,
     tag,
@@ -121,7 +104,6 @@ function WallpaperCreate() {
     populateCategory();
     populateColors();
     populateTags();
-    populateHexColors()
   }, []);
 
   return (
@@ -217,25 +199,6 @@ function WallpaperCreate() {
             </div>
 
             <div className="col d-flex flex-column mt-3">
-              <label>Wallpaper Name</label>
-              <input
-                style={{
-                  padding: "0.4rem 0.3rem",
-                  border: "1px solid rgba(0, 0, 0, 0.2)",
-                  backgroundColor: "rgba(0, 0, 0, 0)",
-                  borderRadius: "4px",
-                  width: "100%",
-                  color: "rgb(131,131,131)",
-                  margin:"0 !important"
-                }}
-                className="priceInput"
-                type="text"
-                name="name"
-                id="name"
-                placeholder="Name"
-                value={metaTitle}
-                onChange={(e) => setMetaTitle(e.target.value)}
-              />
               <label className="mt-3">Paid / Free</label>
               <select
                 style={{

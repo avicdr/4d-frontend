@@ -17,36 +17,10 @@ const BaseUrl = () => {
     },
   ];
 
-  const [rowCount, setRowCount] = useState(1);
   const [data, setData] = useState([]);
   useEffect(() => {
     fetchBaseUrl(setData);
   }, []);
-
-  const addRow = () => {
-    setRowCount(rowCount + 1);
-  };
-  const handleSave = (event) => {
-    event.preventDefault();
-    const row = event.target.parentNode.parentNode;
-    const inputs = row.querySelectorAll("input");
-    const baseurl = inputs[0].value;
-    const remark1 = inputs[1].value;
-    const remark2 = inputs[2].value;
-    const data = { baseurl, remark1, remark2 };
-
-    fetch(`${base}/api/add/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => {
-        fetchAds(setData);
-      })
-      .catch((error) => {});
-  };
   const handleEdit = (id, base_url, remark_1, remark_2) => {
     const baseurl = document.getElementById(base_url).value;
     const remark1 = document.getElementById(remark_1).value;
@@ -68,9 +42,6 @@ const BaseUrl = () => {
 
   return (
     <div className="container">
-      <button className="w-100 btn btn-primary my-2" onClick={addRow}>
-        Add New +
-      </button>
       <table className="table table-stripped ">
         <thead className="table-dark">
           <tr>
@@ -149,57 +120,6 @@ const BaseUrl = () => {
                   }
                 >
                   Save Edit
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-
-        <tbody>
-          {[...Array(rowCount)].map((_, index) => (
-            <tr key={index}>
-              <td style={{ width: "300px" }}>
-                <input
-                  style={{
-                    border: "1px solid grey",
-                    width: "100%",
-                    padding: "5px",
-                    outline: "none",
-                  }}
-                  placeholder="Base URL"
-                  className="table-input"
-                  id={`baseurl-${index}`}
-                />
-              </td>
-              <td style={{ width: "300px" }}>
-                <input
-                  className="table-input"
-                  style={{
-                    border: "1px solid grey",
-                    width: "100%",
-                    padding: "5px",
-                    outline: "none",
-                  }}
-                  placeholder="Remark 1"
-                  id={`remark1-${index}`}
-                />
-              </td>
-              <td>
-                <input
-                  className="table-input"
-                  style={{
-                    border: "1px solid grey",
-                    width: "100%",
-                    padding: "5px",
-                    outline: "none",
-                  }}
-                  placeholder="Remark 2"
-                  id={`remark2-${index}`}
-                />
-              </td>
-              <td>
-                <button className="btn btn-primary" onClick={handleSave}>
-                  Save
                 </button>
               </td>
             </tr>

@@ -10,7 +10,7 @@ function Wallpaper() {
       <div className="row">
         <div className="col-md-12">
           <div>
-            <div className="w-80 m-auto">
+            <div className="w-85 m-auto">
               <div className="row my-3">
                 <div className="col-md-12">
                   <div className="card">
@@ -19,7 +19,7 @@ function Wallpaper() {
                         <li className="nav-item">
                           <a
                             className="nav-link active"
-                            href="#tags"
+                            href="#wallpapers"
                             data-toggle="tab"
                           >
                             Wallpaper
@@ -28,7 +28,7 @@ function Wallpaper() {
                         <li className="nav-item">
                           <a
                             className="nav-link"
-                            href="#tag_create"
+                            href="#wallpaper-create"
                             data-toggle="tab"
                           >
                             Create
@@ -38,11 +38,11 @@ function Wallpaper() {
                     </div>
                     <div className="card-body">
                       <div className="tab-content">
-                        <div className="tab-pane active" id="tags">
+                        <div className="tab-pane active" id="wallpapers">
                           <WallpaperList />
                         </div>
 
-                        <div className="tab-pane " id="tag_create">
+                        <div className="tab-pane " id="wallpaper-create">
                           <WallpaperCreate />
                         </div>
                       </div>

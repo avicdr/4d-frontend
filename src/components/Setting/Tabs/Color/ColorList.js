@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
-import { deleteColor, base } from "../../../../functions/functions.ts";
+import axiosInstance, { deleteColor, base } from "../../../../functions/functions.ts";
 
 const ColorList = ({colors, setColors}) => {
   const [wallpaperCounts, setWallpaperCounts] = useState({});
 
   const fetchWallpaperCounts = async (colorId) => {
     try {
-      const response = await fetch(
-        `${base}/api/color/wallpaper-count/${colorId}`,
+      const response = await axiosInstance.post(
+        `/api/color/wallpaper-count/${colorId}`,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-      const data = await response.json();
       setWallpaperCounts((prevCounts) => ({
         ...prevCounts,
-        [colorId]: data.wallpaper_count_color,
+        [colorId]: response.data.wallpaper_count_color,
       }));
     } catch (error) {
       console.error(error);
